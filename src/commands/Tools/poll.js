@@ -3,59 +3,61 @@ import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '
 import { logger } from '../../utils/logger.js';
 import { getColor } from '../../config/bot.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
+
 const EMOJIS = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
 const MAX_OPTIONS = 10;
+
 export default {
     data: new SlashCommandBuilder()
         .setName('poll')
-        .setDescription('Create a simple poll with up to 10 options')
+        .setDescription('إنشاء تصويت بسيط يحتوي على ما يصل إلى 10 خيارات')
         .addStringOption(option =>
             option.setName('question')
-                .setDescription('The poll question')
+                .setDescription('سؤال التصويت')
                 .setRequired(true))
         .addStringOption(option =>
             option.setName('option1')
-                .setDescription('First option')
+                .setDescription('الخيار الأول')
                 .setRequired(true))
         .addStringOption(option =>
             option.setName('option2')
-                .setDescription('Second option')
+                .setDescription('الخيار الثاني')
                 .setRequired(true))
         .addStringOption(option =>
             option.setName('option3')
-                .setDescription('Third option (optional)')
+                .setDescription('الخيار الثالث (اختياري)')
                 .setRequired(false))
         .addStringOption(option =>
             option.setName('option4')
-                .setDescription('Fourth option (optional)')
+                .setDescription('الخيار الرابع (اختياري)')
                 .setRequired(false))
         .addStringOption(option =>
             option.setName('option5')
-                .setDescription('Fifth option (optional)')
+                .setDescription('الخيار الخامس (اختياري)')
                 .setRequired(false))
         .addStringOption(option =>
             option.setName('option6')
-                .setDescription('Sixth option (optional)')
+                .setDescription('الخيار السادس (اختياري)')
                 .setRequired(false))
         .addStringOption(option =>
             option.setName('option7')
-                .setDescription('Seventh option (optional)')
+                .setDescription('الخيار السابع (اختياري)')
                 .setRequired(false))
         .addStringOption(option =>
             option.setName('option8')
-                .setDescription('Eighth option (optional)')
+                .setDescription('الخيار الثامن (اختياري)')
                 .setRequired(false))
         .addStringOption(option =>
             option.setName('option9')
-                .setDescription('Ninth option (optional)')
+                .setDescription('الخيار التاسع (اختياري)')
                 .setRequired(false))
         .addStringOption(option =>
             option.setName('option10')
-                .setDescription('Tenth option (optional)')
+                .setDescription('الخيار العاشر (اختياري)')
                 .setRequired(false))
         .addBooleanOption(option =>
             option.setName('anonymous')
-                .setDescription('Make the poll anonymous (default: false)')
+                .setDescription('جعل التصويت مجهولاً (الافتراضي: لا)')
                 .setRequired(false)),
 
     async execute(interaction) {
@@ -79,7 +81,7 @@ export default {
         }
 
         if (options.length < 2) {
-            throw new Error("You must provide at least 2 options for the poll.");
+            throw new Error("يجب عليك تحديد خيارين على الأقل للتصويت.");
         }
 
         let description = `**${question}**\n\n`;
@@ -88,13 +90,13 @@ export default {
         });
 
         if (isAnonymous) {
-            description += '\n*This is an anonymous poll. Votes are not tracked to users.*';
+            description += '\n*هذا تصويت مجهول الهوية. لا يتم تعقب الأصوات للمستخدمين.*';
         } else {
-            description += '\n*React with the emoji to vote!*';
+            description += '\n*تفاعل مع الإيموجي للتصويت!*';
         }
 
         const embed = successEmbed(
-            `📊 ${isAnonymous ? 'Anonymous ' : ''}Poll`,
+            `📊 تصويت ${isAnonymous ? 'مجهول' : ''}`,
             description
         );
 
@@ -106,7 +108,7 @@ export default {
         }
 
         await InteractionHelper.safeEditReply(interaction, {
-            content: '✅ Poll created successfully!',
+            content: '✅ تم إنشاء التصويت بنجاح!',
         });
     },
 };
