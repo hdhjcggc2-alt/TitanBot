@@ -4,12 +4,12 @@ import { playQuery, replyMusicSuccess } from '../../services/music/musicActions.
 
 export default {
     slashOnly: true,
-    category: 'Music',
+    category: 'الموسيقى',
     data: new SlashCommandBuilder()
         .setName('play')
-        .setDescription('Play a song or add it to the queue')
+        .setDescription('تشغيل أغنية أو إضافتها إلى قائمة الانتظار')
         .addStringOption((opt) =>
-            opt.setName('query').setDescription('Song name or URL').setRequired(true),
+            opt.setName('query').setDescription('اسم الأغنية أو الرابط').setRequired(true),
         ),
 
     async execute(interaction, config, client) {
