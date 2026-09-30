@@ -3,17 +3,18 @@ import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/
 import { logger } from '../../utils/logger.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
+
 const GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const WEATHER_URL = "https://api.open-meteo.com/v1/forecast";
 
 export default {
     data: new SlashCommandBuilder()
         .setName("weather")
-        .setDescription("Get real-time weather information for a location")
+        .setDescription("عرض حالة الطقس المباشرة لأي موقع")
         .addStringOption((option) =>
             option
                 .setName("city")
-                .setDescription("The city name, e.g., 'London' or 'Tokyo'")
+                .setDescription("اسم المدينة، مثال: 'Baghdad' أو 'Tokyo'")
                 .setRequired(true),
         ),
 
@@ -41,7 +42,7 @@ export default {
                 city: city,
                 guildId: interaction.guildId
             });
-            await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `Could not find a location for **${city}**. Please check the spelling.` });
+            await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `تعذر العثور على موقع باسم **${city}**. يرجى التأكد من كتابة الاسم بشكل صحيح.` });
             return;
         }
 
@@ -60,38 +61,38 @@ export default {
                 userId: interaction.user.id,
                 guildId: interaction.guildId
             });
-            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'A weather service error occurred.' });
+            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'حدث خطأ في خدمة الطقس.' });
             return;
         }
 
         const current = weatherData.current || weatherData.current_weather || {};
-        const temperature = current.temperature != null ? Math.round(current.temperature) : "N/A";
-        const humidity = current.relativehumidity ?? current.relative_humidity_2m ?? "N/A";
-        const windSpeed = current.windspeed != null ? Math.round(current.windspeed) : "N/A";
+        const temperature = current.temperature != null ? Math.round(current.temperature) : "غير متاح";
+        const humidity = current.relativehumidity ?? current.relative_humidity_2m ?? "غير متاح";
+        const windSpeed = current.windspeed != null ? Math.round(current.windspeed) : "غير متاح";
         const weatherCode = current.weathercode ?? current.weather_code ?? null;
 
         const condition = getWeatherDescription(weatherCode);
 
-        const embed = createEmbed({ title: `Weather in ${cityDisplay}, ${country}`, description: condition.description })
+        const embed = createEmbed({ title: `الطقس في ${cityDisplay}، ${country}`, description: condition.description })
             .addFields(
                 {
-                    name: "Temperature",
+                    name: "درجة الحرارة",
                     value: `${temperature}°C`,
                     inline: true,
                 },
                 {
-                    name: "Humidity",
+                    name: "الرطوبة",
                     value: `${humidity}%`,
                     inline: true,
                 },
                 {
-                    name: "Wind Speed",
-                    value: `${windSpeed} km/h`,
+                    name: "سرعة الرياح",
+                    value: `${windSpeed} كم/س`,
                     inline: true,
                 },
             )
             .setFooter({
-                text: `Latitude: ${latitude.toFixed(2)} | Longitude: ${longitude.toFixed(2)}`,
+                text: `خط العرض: ${latitude.toFixed(2)} | خط الطول: ${longitude.toFixed(2)}`,
             });
 
         await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
@@ -107,17 +108,17 @@ export default {
 
 function getWeatherDescription(code) {
     if (code >= 0 && code <= 3) {
-        return { description: "Clear sky / Partly cloudy", emoji: "" };
+        return { description: "سماء صافية / غائم جزئياً", emoji: "☀️" };
     } else if (code >= 45 && code <= 48) {
-        return { description: "Fog and Rime fog", emoji: "" };
+        return { description: "ضباب / ضباب جليدي", emoji: "🌫️" };
     } else if (code >= 51 && code <= 67) {
-        return { description: "Drizzle or Rain", emoji: "" };
+        return { description: "رذاذ / أمطار", emoji: "🌧️" };
     } else if (code >= 71 && code <= 75) {
-        return { description: "Snow fall", emoji: "" };
+        return { description: "تساقط الثلوج", emoji: "❄️" };
     } else if (code >= 80 && code <= 86) {
-        return { description: "Showers (Rain/Snow)", emoji: "" };
+        return { description: "زخات مطر أو ثلج", emoji: "🌦️" };
     } else if (code >= 95 && code <= 99) {
-        return { description: "Thunderstorm", emoji: "" };
+        return { description: "عاصفة رعدية", emoji: "🌩️" };
     }
-    return { description: "Unknown conditions.", emoji: "" };
+    return { description: "حالة الطقس غير معروفة.", emoji: "🌡️" };
 }
