@@ -6,7 +6,7 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
     .setName("serverinfo")
-    .setDescription("Get detailed information about the server"),
+    .setDescription("عرض معلومات تفصيلية عن السيرفر"),
 
   async execute(interaction) {
     const deferSuccess = await InteractionHelper.safeDefer(interaction);
@@ -24,24 +24,24 @@ export default {
 
     const createdTimestamp = Math.floor(guild.createdAt.getTime() / 1000);
 
-    const embed = createEmbed({ title: `Server Info: ${guild.name}`, description: `Server ID: ${guild.id}` })
+    const embed = createEmbed({ title: `معلومات السيرفر: ${guild.name}`, description: `مُعرِّف السيرفر (ID): ${guild.id}` })
       .setThumbnail(guild.iconURL({ size: 256 }))
       .addFields(
-        { name: "Owner", value: owner.user.tag, inline: true },
-        { name: "Members", value: `${guild.memberCount}`, inline: true },
+        { name: "المالك", value: owner.user.tag, inline: true },
+        { name: "الأعضاء", value: `${guild.memberCount}`, inline: true },
         {
-          name: "Channels",
+          name: "القنوات",
           value: `${guild.channels.cache.size}`,
           inline: true,
         },
-        { name: "Roles", value: `${guild.roles.cache.size}`, inline: true },
+        { name: "الرتب", value: `${guild.roles.cache.size}`, inline: true },
         {
-          name: "Boosts",
-          value: `Level ${guild.premiumTier} (${guild.premiumSubscriptionCount})`,
+          name: "التعزيزات (Boosts)",
+          value: `المستوى ${guild.premiumTier} (${guild.premiumSubscriptionCount})`,
           inline: true,
         },
         {
-          name: "Creation Date",
+          name: "تاريخ الإنشاء",
           value: `<t:${createdTimestamp}:R>`,
           inline: true,
         },
