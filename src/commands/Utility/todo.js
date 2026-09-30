@@ -13,119 +13,119 @@ function generateShareId() {
 export default {
     data: new SlashCommandBuilder()
         .setName("todo")
-        .setDescription("Manage your personal to-do list")
+        .setDescription("إدارة قائمة المهام الشخصية الخاصة بك")
         .addSubcommand(subcommand =>
             subcommand
                 .setName("add")
-                .setDescription("Add a task to your to-do list")
+                .setDescription("إضافة مهمة إلى قائمة مهامك")
                 .addStringOption(option =>
                     option
                         .setName("task")
-                        .setDescription("The task to add")
+                        .setDescription("المهمة المراد إضافتها")
                         .setRequired(true)
                 )
         )
         .addSubcommand(subcommand =>
             subcommand
                 .setName("list")
-                .setDescription("View your to-do list")
+                .setDescription("عرض قائمة مهامك")
         )
         .addSubcommand(subcommand =>
             subcommand
                 .setName("complete")
-                .setDescription("Mark a task as complete")
+                .setDescription("تحديد مهمة كمكتملة")
                 .addIntegerOption(option =>
                     option
                         .setName("number")
-                        .setDescription("The number of the task to complete")
+                        .setDescription("رقم المهمة المراد إكمالها")
                         .setRequired(true)
                 )
         )
         .addSubcommand(subcommand =>
             subcommand
                 .setName("remove")
-                .setDescription("Remove a task from your to-do list")
+                .setDescription("حذف مهمة من قائمة مهامك")
                 .addIntegerOption(option =>
                     option
                         .setName("number")
-                        .setDescription("The number of the task to remove")
+                        .setDescription("رقم المهمة المراد حذفها")
                         .setRequired(true)
                 )
         )
         .addSubcommandGroup(group => 
             group
                 .setName("share")
-                .setDescription("Manage shared to-do lists")
+                .setDescription("إدارة قوائم المهام المشتركة")
                 .addSubcommand(subcommand =>
                     subcommand
                         .setName("create")
-                        .setDescription("Create a new shared to-do list")
+                        .setDescription("إنشاء قائمة مهام مشتركة جديدة")
                         .addStringOption(option =>
                             option
                                 .setName("name")
-                                .setDescription("Name for the shared list")
+                                .setDescription("اسم القائمة المشتركة")
                                 .setRequired(true)
                         )
                 )
                 .addSubcommand(subcommand =>
                     subcommand
                         .setName("add")
-                        .setDescription("Add a member to a shared list")
+                        .setDescription("إضافة عضو إلى قائمة مشتركة")
                         .addStringOption(option =>
                             option
                                 .setName("list_id")
-                                .setDescription("ID of the shared list")
+                                .setDescription("مُعرِّف (ID) القائمة المشتركة")
                                 .setRequired(true)
                         )
                         .addUserOption(option =>
                             option
                                 .setName("user")
-                                .setDescription("User to add to the list")
+                                .setDescription("المستخدم المراد إضافته للقائمة")
                                 .setRequired(true)
                         )
                 )
                 .addSubcommand(subcommand =>
                     subcommand
                         .setName("view")
-                        .setDescription("View a shared to-do list")
+                        .setDescription("عرض قائمة مهام مشتركة")
                         .addStringOption(option =>
                             option
                                 .setName("list_id")
-                                .setDescription("ID of the shared list")
+                                .setDescription("مُعرِّف (ID) القائمة المشتركة")
                                 .setRequired(true)
                         )
                 )
                 .addSubcommand(subcommand =>
                     subcommand
                         .setName("addtask")
-                        .setDescription("Add a task to a shared to-do list")
+                        .setDescription("إضافة مهمة إلى قائمة مشتركة")
                         .addStringOption(option =>
                             option
                                 .setName("list_id")
-                                .setDescription("ID of the shared list")
+                                .setDescription("مُعرِّف (ID) القائمة المشتركة")
                                 .setRequired(true)
                         )
                         .addStringOption(option =>
                             option
                                 .setName("task")
-                                .setDescription("The task to add")
+                                .setDescription("المهمة المراد إضافتها")
                                 .setRequired(true)
                         )
                 )
                 .addSubcommand(subcommand =>
                     subcommand
                         .setName("remove")
-                        .setDescription("Remove a task from a shared to-do list")
+                        .setDescription("حذف مهمة من قائمة مشتركة")
                         .addStringOption(option =>
                             option
                                 .setName("list_id")
-                                .setDescription("ID of the shared list")
+                                .setDescription("مُعرِّف (ID) القائمة المشتركة")
                                 .setRequired(true)
                         )
                         .addIntegerOption(option =>
                             option
                                 .setName("number")
-                                .setDescription("The number of the task to remove")
+                                .setDescription("رقم المهمة المراد حذفها")
                                 .setRequired(true)
                         )
                 )
@@ -136,8 +136,8 @@ export default {
 
     async execute(interaction, config, client) {
         const userId = interaction.user.id;
-                const subcommand = interaction.options.getSubcommand();
-                const shareSubcommand = interaction.options.getSubcommandGroup() === 'share' ? interaction.options.getSubcommand() : null;
+        const subcommand = interaction.options.getSubcommand();
+        const shareSubcommand = interaction.options.getSubcommandGroup() === 'share' ? interaction.options.getSubcommand() : null;
 
         async function getOrCreateSharedList(listId, creatorId = null, listName = null) {
             const listKey = `shared_todo_${listId}`;
@@ -197,9 +197,9 @@ export default {
                     return await InteractionHelper.safeEditReply(interaction, {
                         embeds: [
                             successEmbed(
-                                "Shared List Created",
-                                `Created shared list "${listName}" with ID: \`${listId}\`\n` +
-                                `Use \`/todo share add list_id:${listId} user:@username\` to add members.`
+                                "تم إنشاء القائمة المشتركة",
+                                `تم إنشاء القائمة المشتركة "${listName}" بمُعرِّف: \`${listId}\`\n` +
+                                `استخدم \`/todo share add list_id:${listId} user:@username\` لإضافة أعضاء.`
                             )
                         ]
                     });
@@ -211,11 +211,11 @@ export default {
 
                     const listData = await getOrCreateSharedList(listId);
                     if (!listData) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list not found.' });
+                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'القائمة المشتركة غير موجودة.' });
                     }
 
                     if (listData.creatorId !== userId) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Only the list creator can add members.' });
+                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'منشئ القائمة فقط يمكنه إضافة أعضاء.' });
                     }
 
                     if (!listData.members.includes(memberToAdd.id)) {
@@ -231,13 +231,13 @@ export default {
 
                         return await InteractionHelper.safeEditReply(interaction, {
                             embeds: [
-                                successEmbed('Member Added', 
-                                    `Added ${memberToAdd.username} to the shared list "${listData.name}"`
+                                successEmbed('تمت إضافة العضو', 
+                                    `تمت إضافة ${memberToAdd.username} إلى القائمة المشتركة "${listData.name}"`
                                 )
                             ]
                         });
                     } else {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'User is already a member of this list.' });
+                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'المستخدم عضو بالفعل في هذه القائمة.' });
                     }
                 }
 
@@ -246,18 +246,18 @@ export default {
                     const listData = await getOrCreateSharedList(listId);
 
                     if (!listData) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list not found.' });
+                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'القائمة المشتركة غير موجودة.' });
                     }
 
                     if (!listData.members.includes(userId)) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
+                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'ليس لديك صلاحية الوصول إلى هذه القائمة.' });
                     }
 
                     if (listData.tasks.length === 0) {
                         const memberList = listData.members.map(memberId => {
                             const member = interaction.guild.members.cache.get(memberId);
                             return member ? member.user.username : `<@${memberId}>`;
-                        }).join(',');
+                        }).join(', ');
 
                         const owner = interaction.guild.members.cache.get(listData.creatorId);
                         const ownerName = owner ? owner.user.username : `<@${listData.creatorId}>`;
@@ -266,25 +266,25 @@ export default {
                                 embeds: [
                                     successEmbed(
                                         `📋 **${listData.name}**\n\n` +
-                                        `👑 **Owner:** ${ownerName}\n` +
-                                        `👥 **Members:** ${memberList}\n\n` +
-                                        `*This list is currently empty. Use the "Add Task" button to add tasks!*`,
-                                        `Shared List (ID: \`${listId}\`)`
+                                        `👑 **المالك:** ${ownerName}\n` +
+                                        `👥 **الأعضاء:** ${memberList}\n\n` +
+                                        `*هذه القائمة فارغة حالياً. استخدم زر "إضافة مهمة" لإضافة مهام جديدة!*`,
+                                        `قائمة مشتركة (ID: \`${listId}\`)`
                                     )
                                 ],
                                 components: [
                                     new ActionRowBuilder().addComponents(
                                         new ButtonBuilder()
                                             .setCustomId(`shared_todo_add_${listId}`)
-                                            .setLabel('Add Task')
+                                            .setLabel('إضافة مهمة')
                                             .setStyle(ButtonStyle.Primary),
                                         new ButtonBuilder()
                                             .setCustomId(`shared_todo_complete_${listId}`)
-                                            .setLabel('Complete Task')
+                                            .setLabel('إكمال مهمة')
                                             .setStyle(ButtonStyle.Success),
                                         new ButtonBuilder()
                                             .setCustomId(`shared_todo_remove_${listId}`)
-                                            .setLabel('Remove Task')
+                                            .setLabel('حذف مهمة')
                                             .setStyle(ButtonStyle.Danger)
                                     )
                                 ]
@@ -293,42 +293,42 @@ export default {
 
                     const taskList = listData.tasks
                         .map(task => 
-                            `${task.completed ? '✅' : '📝'} #${task.id} ${task.text}` +
+                            `${task.completed ? '✅' : '📝'} #${task.id}${task.text} ` +
                             `\`[${new Date(task.createdAt).toLocaleDateString()}]` +
-                            (task.completed ? `• Completed by ${task.completedBy}` : '') + '`'
+                            (task.completed ? `• اكتملت بواسطة ${task.completedBy}` : '') + '`'
                         )
                         .join('\n');
 
                     const memberList = listData.members.map(memberId => {
                         const member = interaction.guild.members.cache.get(memberId);
                         return member ? member.user.username : `<@${memberId}>`;
-                    }).join(',');
+                    }).join(', ');
 
                     const owner = interaction.guild.members.cache.get(listData.creatorId);
                     const ownerName = owner ? owner.user.username : `<@${listData.creatorId}>`;
 
                     const fullListDisplay = `📋 **${listData.name}**\n\n` +
-                        `👑 **Owner:** ${ownerName}\n` +
-                        `👥 **Members:** ${memberList}\n\n` +
-                        `**Tasks:**\n${taskList}`;
+                        `👑 **المالك:** ${ownerName}\n` +
+                        `👥 **الأعضاء:** ${memberList}\n\n` +
+                        `**المهام:**\n${taskList}`;
 
                     return await InteractionHelper.safeEditReply(interaction, {
                         embeds: [
-                            successEmbed(`Shared List (ID: \`${listId}\`)`, fullListDisplay)
+                            successEmbed(`قائمة مشتركة (ID: \`${listId}\`)`, fullListDisplay)
                         ],
                         components: [
                             new ActionRowBuilder().addComponents(
                                 new ButtonBuilder()
                                     .setCustomId(`shared_todo_add_${listId}`)
-                                    .setLabel('Add Task')
+                                    .setLabel('إضافة مهمة')
                                     .setStyle(ButtonStyle.Primary),
                                 new ButtonBuilder()
                                     .setCustomId(`shared_todo_complete_${listId}`)
-                                    .setLabel('Complete Task')
+                                    .setLabel('إكمال مهمة')
                                     .setStyle(ButtonStyle.Success),
                                 new ButtonBuilder()
                                     .setCustomId(`shared_todo_remove_${listId}`)
-                                    .setLabel('Remove Task')
+                                    .setLabel('حذف مهمة')
                                     .setStyle(ButtonStyle.Danger)
                             )
                         ]
@@ -342,11 +342,11 @@ export default {
                     const listData = await getOrCreateSharedList(listId);
 
                     if (!listData) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list not found.' });
+                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'القائمة المشتركة غير موجودة.' });
                     }
 
                     if (!listData.members.includes(userId)) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
+                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'ليس لديك صلاحية الوصول إلى هذه القائمة.' });
                     }
 
                     const newTask = {
@@ -362,7 +362,7 @@ export default {
 
                     return await InteractionHelper.safeEditReply(interaction, {
                         embeds: [
-                            successEmbed('Task Added', `Added "${taskText}" to the shared list "${listData.name}"`)
+                            successEmbed('تمت إضافة المهمة', `تمت إضافة "${taskText}" إلى القائمة المشتركة "${listData.name}"`)
                         ]
                     });
                 }
@@ -374,16 +374,16 @@ export default {
                     const listData = await getOrCreateSharedList(listId);
 
                     if (!listData) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Shared list not found.' });
+                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'القائمة المشتركة غير موجودة.' });
                     }
 
                     if (!listData.members.includes(userId)) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You don\'t have access to this list.' });
+                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'ليس لديك صلاحية الوصول إلى هذه القائمة.' });
                     }
 
                     const taskIndex = listData.tasks.findIndex(task => task.id === taskNumber);
                     if (taskIndex === -1) {
-                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task not found.' });
+                        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'المهمة غير موجودة.' });
                     }
 
                     const [removedTask] = listData.tasks.splice(taskIndex, 1);
@@ -391,7 +391,7 @@ export default {
 
                     return await InteractionHelper.safeEditReply(interaction, {
                         embeds: [
-                            successEmbed('Task Removed', `Removed "${removedTask.text}" from the shared list "${listData.name}".`)
+                            successEmbed('تم حذف المهمة', `تم حذف "${removedTask.text}" من القائمة المشتركة "${listData.name}".`)
                         ]
                     });
                 }
@@ -426,76 +426,11 @@ export default {
                 return await InteractionHelper.safeEditReply(interaction, {
                     embeds: [
                         successEmbed(
-                            "Task Added",
-                            `Added "${taskText}" to your to-do list.`
+                            "تمت إضافة المهمة",
+                            `تمت إضافة "${taskText}" إلى قائمة مهامك.`
                         ),
                     ],
                 });
             }
 
-            case 'list': {
-                if (userData.tasks.length === 0) {
-                    return await InteractionHelper.safeEditReply(interaction, {
-                        embeds: [successEmbed('Your to-do list is empty!', "Your To-Do List")],
-                    });
-                }
-
-                const taskList = userData.tasks
-                    .map(task => 
-                        `${task.completed ? '✅' : '📝'} #${task.id} ${task.text}` +
-                        `\`[${new Date(task.createdAt).toLocaleDateString()}\``
-                    )
-                    .join('\n');
-
-                return await InteractionHelper.safeEditReply(interaction, {
-                    embeds: [
-                        successEmbed('Your To-Do List', taskList)
-                    ],
-                });
-            }
-
-            case 'complete': {
-                const taskNumber = interaction.options.getInteger('number');
-                const task = userData.tasks.find(t => t.id === taskNumber);
-
-                if (!task) {
-                    return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task not found.' });
-                }
-
-                if (task.completed) {
-                    return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Task #${task.id} is already completed.` });
-                }
-
-                task.completed = true;
-                await setInDb(`todo_${userId}`, userData);
-
-                return await InteractionHelper.safeEditReply(interaction, {
-                    embeds: [
-                        successEmbed('Task Completed', `Marked "${task.text}" as complete!`)
-                    ],
-                });
-            }
-
-            case 'remove': {
-                const taskNumber = interaction.options.getInteger('number');
-                const taskIndex = userData.tasks.findIndex(t => t.id === taskNumber);
-
-                if (taskIndex === -1) {
-                    return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Task not found.' });
-                }
-
-                const [removedTask] = userData.tasks.splice(taskIndex, 1);
-                await setInDb(`todo_${userId}`, userData);
-
-                return await InteractionHelper.safeEditReply(interaction, {
-                    embeds: [
-                        successEmbed('Task Removed', `Removed "${removedTask.text}" from your to-do list.`)
-                    ],
-                });
-            }
-
-            default:
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Invalid subcommand.' });
-        }
-    },
-};
+            
