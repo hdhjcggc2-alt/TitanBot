@@ -15,7 +15,7 @@ export default {
                     term: term,
                     guildId: interaction.guildId
                 });
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Please enter a term with at least 2 characters.' });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'يرجى إدخال مصطلح يتكون من حرفين على الأقل.' });
             }
 
             let deferTimer = null;
@@ -43,12 +43,12 @@ export default {
             clearDeferTimer();
 
             if (!response.data?.list?.length) {
-                return await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `No definitions found for "${term}" on Urban Dictionary.` });
+                return await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `لم يتم العثور على تعريفات للمصطلح "${term}" في Urban Dictionary.` });
             }
 
             const definition = response.data.list[0];
-            const cleanDefinition = definition.definition.replace(/\[|\]/g, '');
-            const cleanExample = definition.example.replace(/\[|\]/g, '');
+            const cleanDefinition = definition.definition.replace(/\[\vert{}\]/g, '');
+            const cleanExample = definition.example.replace(/\[\vert{}\]/g, '');
 
             const formattedDefinition = cleanDefinition
                 .replace(/\n\s*\n/g, '\n\n')
@@ -56,7 +56,7 @@ export default {
 
             const formattedExample = cleanExample
                 ? `*"${cleanExample.replace(/\n/g, ' ').slice(0, 500)}..."*`
-                : '*No example provided*';
+                : '*لا يوجد مثال موضح*';
 
             const embed = createEmbed({
                 title: definition.word,
@@ -66,18 +66,18 @@ export default {
             .setURL(definition.permalink)
             .addFields(
                 {
-                    name: 'Example',
+                    name: 'مثال',
                     value: formattedExample,
                     inline: false
                 },
                 {
-                    name: 'Stats',
-                    value: `${definition.thumbs_up.toLocaleString()} • ${definition.thumbs_down.toLocaleString()}`,
+                    name: 'الإحصائيات',
+                    value: `👍 ${definition.thumbs_up.toLocaleString()} • 👎 ${definition.thumbs_down.toLocaleString()}`,
                     inline: true
                 },
                 {
-                    name: 'Author',
-                    value: definition.author || 'Anonymous',
+                    name: 'الكاتب',
+                    value: definition.author || 'مجهول',
                     inline: true
                 }
             )
@@ -107,9 +107,9 @@ export default {
             });
 
             if (error.response?.status === 404 || !error.response) {
-                await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `No definitions found for "${interaction.options.getString('term')}" on Urban Dictionary.` });
+                await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `لم يتم العثور على تعريفات للمصطلح "${interaction.options.getString('term')}" في Urban Dictionary.` });
             } else if (error.response?.status === 429) {
-                await replyUserError(interaction, { type: ErrorTypes.RATE_LIMIT, message: 'Too many requests to Urban Dictionary. Please try again in a few minutes.' });
+                await replyUserError(interaction, { type: ErrorTypes.RATE_LIMIT, message: 'طلبات كثيرة جداً إلى Urban Dictionary. يرجى المحاولة مرة أخرى بعد بضع دقائق.' });
             } else {
                 await handleInteractionError(interaction, error, {
                     commandName: 'urban',
