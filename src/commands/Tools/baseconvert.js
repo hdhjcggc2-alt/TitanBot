@@ -6,10 +6,10 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { getColor } from '../../config/bot.js';
 
 const BASE_ALPHABETS = {
-    'BIN': { base: 2, prefix: '0b', name: 'Binary', alphabet: '01' },
-    'OCT': { base: 8, prefix: '0o', name: 'Octal', alphabet: '0-7' },
-    'DEC': { base: 10, prefix: '', name: 'Decimal', alphabet: '0-9' },
-    'HEX': { base: 16, prefix: '0x', name: 'Hexadecimal', alphabet: '0-9A-F' },
+    'BIN': { base: 2, prefix: '0b', name: 'ثنائي (Binary)', alphabet: '01' },
+    'OCT': { base: 8, prefix: '0o', name: 'ثماني (Octal)', alphabet: '0-7' },
+    'DEC': { base: 10, prefix: '', name: 'عشري (Decimal)', alphabet: '0-9' },
+    'HEX': { base: 16, prefix: '0x', name: 'ست عشري (Hexadecimal)', alphabet: '0-9A-F' },
     'B64': { base: 64, prefix: 'b64:', name: 'Base64', alphabet: 'A-Za-z0-9+/=' },
     'B36': { base: 36, prefix: '', name: 'Base36', alphabet: '0-9A-Z' },
     'B58': { base: 58, prefix: '', name: 'Base58', alphabet: '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz' },
@@ -35,7 +35,7 @@ function parseBigIntFromBase(value, baseKey) {
 
     const charset = BASE_CHARSETS[baseKey];
     if (!charset) {
-        throw new Error(`Unsupported base: ${baseKey}`);
+        throw new Error(`نظام عد غير مدعوم: ${baseKey}`);
     }
 
     const normalized = ['BIN', 'OCT', 'DEC', 'HEX', 'B36'].includes(baseKey)
@@ -48,7 +48,7 @@ function parseBigIntFromBase(value, baseKey) {
     for (const char of normalized) {
         const digit = charset.indexOf(char);
         if (digit < 0) {
-            throw new Error(`Invalid character '${char}' for base ${baseKey}`);
+            throw new Error(`حرف غير صالح '${char}' لنظام العد ${baseKey}`);
         }
         result = (result * base) + BigInt(digit);
     }
@@ -74,7 +74,7 @@ function formatBigIntToBase(value, baseKey) {
 
     const charset = BASE_CHARSETS[baseKey];
     if (!charset) {
-        throw new Error(`Unsupported base: ${baseKey}`);
+        throw new Error(`نظام عد غير مدعوم: ${baseKey}`);
     }
 
     if (value === 0n) {
@@ -97,19 +97,19 @@ function formatBigIntToBase(value, baseKey) {
 export default {
     data: new SlashCommandBuilder()
         .setName('baseconvert')
-        .setDescription('Convert numbers between different bases')
+        .setDescription('التحويل بين أنظمة العد المختلفة')
         .addStringOption(option =>
             option.setName('number')
-                .setDescription('The number to convert')
+                .setDescription('الرقم المراد تحويله')
                 .setRequired(true))
         .addStringOption(option =>
             option.setName('from')
-                .setDescription('Source base/format')
+                .setDescription('نظام العد المصدر')
                 .setRequired(true)
                 .addChoices(...BASE_NAMES))
         .addStringOption(option =>
             option.setName('to')
-                .setDescription('Target base/format (default: all)')
+                .setDescription('نظام العد الهدف (الافتراضي: تحويل لجميع الأنظمة)')
                 .setRequired(false)
                 .addChoices(...BASE_NAMES)),
 
@@ -137,7 +137,7 @@ export default {
         if (!cleanNumber) {
             return replyUserError(interaction, {
                 type: ErrorTypes.VALIDATION,
-                message: 'You must provide a number to convert.\n\n**Example:** `/baseconvert number:1010 from:BIN to:DEC`',
+                message: 'يجب عليك تقديم رقم لتحويله.\n\n**مثال:** `/baseconvert number:1010 from:BIN to:DEC`',
             });
         }
 
@@ -147,18 +147,18 @@ export default {
         if (!regex.test(cleanNumber)) {
             let examples = '';
             if (fromBase === 'BIN') {
-                examples = '\n\n**Valid:** 101, 1010, 11111 | **Invalid:** 5 (digit 5 not allowed)';
+                examples = '\n\n**صحيح:** 101, 1010, 11111 | **غير صحيح:** 5 (الرقم 5 غير مسموح به)';
             } else if (fromBase === 'OCT') {
-                examples = '\n\n**Valid:** 77, 123, 755 | **Invalid:** 8 (only 0-7 allowed)';
+                examples = '\n\n**صحيح:** 77, 123, 755 | **غير صحيح:** 8 (مسموح بالأرقام من 0 إلى 7 فقط)';
             } else if (fromBase === 'DEC') {
-                examples = '\n\n**Valid:** 42, 123, 999 | **Invalid:** 12.34 (no decimals)';
+                examples = '\n\n**صحيح:** 42, 123, 999 | **غير صحيح:** 12.34 (لا يُسمح بالفواصل العشرية)';
             } else if (fromBase === 'HEX') {
-                examples = '\n\n**Valid:** FF, A1B2, DEADBEEF | **Invalid:** G (only 0-9, A-F)';
+                examples = '\n\n**صحيح:** FF, A1B2, DEADBEEF | **غير صحيح:** G (مسموح بالرموز 0-9 و A-F فقط)';
             }
-            logger.warn(`Invalid base conversion input: ${cleanNumber} for base ${fromBase}`);
+            logger.warn(`Invalid base conversion input: ${cleanNumber} for base${fromBase}`);
             return replyUserError(interaction, {
                 type: ErrorTypes.VALIDATION,
-                message: `You provided: \`${cleanNumber}\`\n\nValid characters: \`${alphabet}\`${examples}`,
+                message: `المدخل المقدم: \`${cleanNumber}\`\n\nالأحرف/الرموز المسموحة: \`${alphabet}\`${examples}`,
             });
         }
 
@@ -173,7 +173,7 @@ export default {
             logger.error('Base conversion parse error:', error);
             return replyUserError(interaction, {
                 type: ErrorTypes.VALIDATION,
-                message: 'The number is too large to process.\n\nTry with a smaller number.',
+                message: 'الرقم كبير جداً ولا يمكن معالجته.\n\nيرجى المحاولة باستخدام رقم أصغر.',
             });
         }
 
@@ -185,10 +185,10 @@ export default {
                 result = formatBigIntToBase(decimalValue, toBase);
 
                 const embed = successEmbed(
-                    '🔄 Base Conversion Result',
-                    `**From ${fromName} (${fromBase}):** \`${fromPrefix}${cleanNumber}\`\n` +
-                    `**To ${toName} (${toBase}):** \`${toPrefix}${result}\`\n` +
-                    `**Decimal:** \`${decimalValue.toLocaleString()}\``
+                    '🔄 نتيجة تحويل نظام العد',
+                    `**من ${fromName} (${fromBase}):** \`${fromPrefix}${cleanNumber}\`\n` +
+                    `**إلى ${toName} (${toBase}):** \`${toPrefix}${result}\`\n` +
+                    `**النظام العشري (Decimal):** \`${decimalValue.toLocaleString()}\``
                 );
                 embed.setColor(getColor('success'));
 
@@ -198,13 +198,13 @@ export default {
                 logger.error(`Base conversion error to ${toName}:`, error);
                 await replyUserError(interaction, {
                     type: ErrorTypes.VALIDATION,
-                    message: 'The result would be too large or incompatible.\n\nTry with a smaller number or different target base.',
+                    message: 'النتيجة كبيرة جداً أو غير متوافقة.\n\nيرجى المحاولة باستخدام رقم أصغر أو اختيار نظام عد مختلف.',
                 });
             }
 
         } else {
-            let description = `**Input (${fromName}):** \`${fromPrefix}${cleanNumber}\`\n`;
-            description += `**Decimal:** \`${decimalValue.toLocaleString()}\`\n\n`;
+            let description = `**المدخل (${fromName}):** \`${fromPrefix}${cleanNumber}\`\n`;
+            description += `**النظام العشري (Decimal):** \`${decimalValue.toLocaleString()}\`\n\n`;
 
             for (const [baseKey, { prefix, name }] of Object.entries(BASE_ALPHABETS)) {
                 if (baseKey === fromBase) continue;
@@ -214,12 +214,12 @@ export default {
 
                     description += `**${name} (${baseKey}):** \`${prefix}${value}\`\n`;
                 } catch (error) {
-                    description += `**${name} (${baseKey}):** *Too large to convert*\n`;
+                    description += `**${name} (${baseKey}):** *كبير جداً للتحويل*\n`;
                 }
             }
 
             const embed = successEmbed(
-                '🔄 Base Conversion Results',
+                '🔄 نتائج التحويل لجميع أنظمة العد',
                 description
             );
             embed.setColor(getColor('primary'));
