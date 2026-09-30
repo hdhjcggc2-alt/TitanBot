@@ -2,14 +2,15 @@ import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
+
 export default {
     data: new SlashCommandBuilder()
     .setName("userinfo")
-    .setDescription("Get detailed information about a user")
+    .setDescription("عرض معلومات تفصيلية عن مستخدم معين")
     .addUserOption((option) =>
       option
         .setName("target")
-        .setDescription("The user to inspect (defaults to you)"),
+        .setDescription("المستخدم المراد عرض معلوماته (افتراضياً أنت)"),
     ),
 
   async execute(interaction) {
@@ -29,35 +30,35 @@ export default {
     const createdTimestamp = Math.floor(user.createdAt.getTime() / 1000);
     const joinedTimestamp = member?.joinedAt ? Math.floor(member.joinedAt.getTime() / 1000) : null;
 
-    const embed = createEmbed({ title: `User Info: ${user.username}` })
+    const embed = createEmbed({ title: `معلومات المستخدم: ${user.username}` })
       .setThumbnail(user.displayAvatarURL({ size: 256 }))
       .addFields(
-        { name: "ID", value: user.id, inline: true },
-        { name: "Bot", value: user.bot ? "Yes" : "No", inline: true },
+        { name: "المُعرِّف (ID)", value: user.id, inline: true },
+        { name: "بوت؟", value: user.bot ? "نعم" : "لا", inline: true },
         {
-          name: "Roles",
+          name: "الرتب",
           value:
             member && member.roles.cache.size > 1
               ? member.roles.cache
                   .map((r) => r.name)
                   .slice(0, 5)
-                  .join(",")
-              : "None",
+                  .join(", ")
+              : "لا يوجد",
           inline: true,
         },
         {
-          name: "Account Created",
+          name: "تاريخ إنشاء الحساب",
           value: `<t:${createdTimestamp}:R>`,
           inline: false,
         },
         {
-          name: "Joined Server",
-          value: joinedTimestamp ? `<t:${joinedTimestamp}:R>` : "Not in server",
+          name: "تاريخ الانضمام للسيرفر",
+          value: joinedTimestamp ? `<t:${joinedTimestamp}:R>` : "غير موجود بالسيرفر",
           inline: false,
         },
         {
-          name: "Highest Role",
-          value: member?.roles?.highest?.name || "None",
+          name: "أعلى رتبة",
+          value: member?.roles?.highest?.name || "لا يوجد",
           inline: true,
         },
       );
