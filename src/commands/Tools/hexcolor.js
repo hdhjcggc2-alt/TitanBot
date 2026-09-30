@@ -5,13 +5,14 @@ import { getColor } from '../../config/bot.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+
 export default {
     data: new SlashCommandBuilder()
         .setName('hexcolor')
-        .setDescription('Generate a random hex color with preview')
+        .setDescription('توليد لون هكس (Hex) عشوائي أو عرض تفاصيل لون محدد مع المعاينة')
         .addStringOption(option =>
             option.setName('color')
-                .setDescription('Specific hex color (e.g., #FF5733 or FF5733)')
+                .setDescription('رمز اللون بالتنسيق الهكس (مثال: FF5733# أو FF5733)')
                 .setRequired(false)),
 
     async execute(interaction) {
@@ -27,7 +28,10 @@ export default {
                 } else {
                     hexColor = hexColor.replace('#', '');
                     if (!/^[0-9A-Fa-f]{3,6}$/.test(hexColor)) {
-                        return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please provide a valid hex code.\n\n**Valid formats:**\n• `#FF5733` (with hash)\n• `FF5733` (without hash)\n• `F57` (3-digit shorthand)\n\n**Invalid:** `#GG5733` (G is not a hex digit)' });
+                        return await replyUserError(interaction, { 
+                            type: ErrorTypes.VALIDATION, 
+                            message: 'يرجى تقديم رمز كود هكس صحيح.\n\n**الصيغ المقبولة:**\n• `#FF5733` (مع علامة الهاش)\n• `FF5733` (بدون علامة الهاش)\n• `F57` (اختصار من 3 خانات)\n\n**غير صالح:** `#GG5733` (الحرف G ليس رقماً هكس)' 
+                        });
                     }
 
                     if (hexColor.length === 3) {
@@ -49,22 +53,22 @@ export default {
                 const colorName = getColorName(hexColor);
 
                 const embed = successEmbed(
-                    '🎨 Color Information',
-                    `**Hex:** \`${hexColor}\`\n` +
-                    `**RGB:** \`rgb(${r}, ${g}, ${b})\`\n` +
+                    '🎨 معلومات اللون',
+                    `**الهكس (Hex):** \`${hexColor}\`\n` +
+                    `**RGB:** \`rgb(${r}, ${g},${b})\`\n` +
                     `**HSL:** \`${rgbToHsl(r, g, b)}\`\n` +
-                    `**Name:** ${colorName || 'Custom Color'}`
+                    `**الاسم:** ${colorName || 'لون مخصص'}`
                 )
                     .setColor(hexColor)
                     .setImage(colorPreviewUrl);
 
                 if (isRandom) {
-                    embed.setFooter({ text: 'Randomly generated color' });
+                    embed.setFooter({ text: 'لون تم توليده عشوائياً' });
                 }
 
                 await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
             },
-            'Failed to generate color information. Please try again.',
+            'فشل توليد معلومات اللون. يرجى المحاولة مرة أخرى.',
             {
                 autoDefer: true,
                 deferOptions: { flags: MessageFlags.Ephemeral }
@@ -79,7 +83,7 @@ function rgbToHsl(r, g, b) {
     let h, s, l = (max + min) / 2;
 
     if (max === min) {
-h = s = 0;
+        h = s = 0;
     } else {
         const d = max - min;
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
@@ -96,26 +100,26 @@ h = s = 0;
 
 function getColorName(hex) {
     const colors = {
-        '#FF0000': 'Red',
-        '#00FF00': 'Green',
-        '#0000FF': 'Blue',
-        '#FFFF00': 'Yellow',
-        '#FF00FF': 'Magenta',
-        '#00FFFF': 'Cyan',
-        '#000000': 'Black',
-        '#FFFFFF': 'White',
-        '#808080': 'Gray',
-        '#FFA500': 'Orange',
-        '#800080': 'Purple',
-        '#A52A2A': 'Brown',
-        '#FFC0CB': 'Pink',
-        '#008000': 'Dark Green',
-        '#000080': 'Navy',
-        '#FFD700': 'Gold',
-        '#C0C0C0': 'Silver',
-        '#FF6347': 'Tomato',
-        '#40E0D0': 'Turquoise',
-        '#E6E6FA': 'Lavender'
+        '#FF0000': 'أحمر',
+        '#00FF00': 'أخضر',
+        '#0000FF': 'أزرق',
+        '#FFFF00': 'أصفر',
+        '#FF00FF': 'أرجواني (Magenta)',
+        '#00FFFF': 'سماوي (Cyan)',
+        '#000000': 'أسود',
+        '#FFFFFF': 'أبيض',
+        '#808080': 'رمادي',
+        '#FFA500': 'برتقالي',
+        '#800080': 'بنفسجي (Purple)',
+        '#A52A2A': 'بني',
+        '#FFC0CB': 'وردي',
+        '#008000': 'أخضر داكن',
+        '#000080': 'كحلي (Navy)',
+        '#FFD700': 'ذهبي',
+        '#C0C0C0': 'فضي',
+        '#FF6347': 'طماطمي (Tomato)',
+        '#40E0D0': 'فيروزي',
+        '#E6E6FA': 'لافندر'
     };
     
     if (colors[hex.toUpperCase()]) {
@@ -136,5 +140,5 @@ function getColorName(hex) {
         }
     }
     
-    return minDistance < 1000000 ? `Close to ${closestColor}` : null;
+    return minDistance < 1000000 ? `قريب من اللون ${closestColor}` : null;
 }
