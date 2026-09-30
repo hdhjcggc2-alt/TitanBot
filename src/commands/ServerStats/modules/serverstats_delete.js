@@ -6,6 +6,7 @@ import { logger } from '../../../utils/logger.js';
 
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { replyUserError, ErrorTypes, createError, wrapServiceBoundary } from '../../../utils/errorHandler.js';
+
 export async function handleDelete(interaction, client) {
     const guild = interaction.guild;
     const counterId = interaction.options.getString("counter-id");
@@ -18,7 +19,7 @@ export async function handleDelete(interaction, client) {
     }
 
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageChannels)) {
-        await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need **Manage Channels** permission to delete counters.' }).catch(logger.error);
+        await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'أنت بحاجة إلى صلاحية **إدارة القنوات (Manage Channels)** لحذف العدادات.' }).catch(logger.error);
         return;
     }
 
@@ -26,32 +27,32 @@ export async function handleDelete(interaction, client) {
         const counters = await getServerCounters(client, guild.id);
 
         if (counters.length === 0) {
-            await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: 'No counters found to delete.' }).catch(logger.error);
+            await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: 'لم يتم العثور على أي عدادات لحذفها.' }).catch(logger.error);
             return;
         }
 
         const counterToDelete = counters.find(c => c.id === counterId);
         if (!counterToDelete) {
-            await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `Counter with ID \`${counterId}\` not found. Use \`/serverstats list\` to see all counters.` }).catch(logger.error);
+            await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `لم يتم العثور على عداد بالمعرف \`${counterId}\`. استخدم الأمر \`/serverstats list\` لعرض جميع العدادات.` }).catch(logger.error);
             return;
         }
 
         const channel = guild.channels.cache.get(counterToDelete.channelId);
 
         const embed = createEmbed({
-            title: "Delete Counter & Channel",
-            description: `Are you sure you want to delete this counter and its channel?\n\n**ID:** \`${counterToDelete.id}\`\n**Type:** ${getCounterTypeDisplay(counterToDelete.type)}\n**Channel:** ${channel || 'Deleted Channel'}\n\n **The channel will be permanently deleted!**`,
+            title: "حذف العداد والقناة",
+            description: `هل أنت تأكد من رغبتك في حذف هذا العداد والقناة الخاصة به؟\n\n**المعرف (ID):** \`${counterToDelete.id}\`\n**النوع:** ${getCounterTypeDisplay(counterToDelete.type)}\n**القناة:** ${channel || 'قناة محذوفة'}\n\n ⚠️ **سيتم حذف القناة نهائياً!**`,
             color: getColor('error')
         });
 
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId(`counter-delete:confirm:${counterToDelete.id}:${interaction.user.id}`)
-                .setLabel("Confirm Delete")
+                .setLabel("تأكيد الحذف")
                 .setStyle(ButtonStyle.Danger),
             new ButtonBuilder()
                 .setCustomId(`counter-delete:cancel:${counterToDelete.id}:${interaction.user.id}`)
-                .setLabel("Cancel")
+                .setLabel("إلغاء")
                 .setStyle(ButtonStyle.Secondary)
         );
 
@@ -59,7 +60,7 @@ export async function handleDelete(interaction, client) {
 
     } catch (error) {
         logger.error("Error in handleDelete:", error);
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while fetching counters. Please try again.' }).catch(logger.error);
+        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'حدث خطأ أثناء جلب العدادات. يرجى المحاولة مرة أخرى.' }).catch(logger.error);
     }
 }
 
@@ -71,7 +72,7 @@ export const performDeletionByCounterId = wrapServiceBoundary(async function per
         throw createError(
             'Counter not found',
             ErrorTypes.USER_INPUT,
-            `Counter with ID \`${counterId}\` was not found.`,
+            `لم يتم العثور على عداد بالمعرف \`${counterId}\`.`,
             { guildId: guild.id, counterId, operation: 'performDeletionByCounterId' }
         );
     }
@@ -83,7 +84,7 @@ export const performDeletionByCounterId = wrapServiceBoundary(async function per
         throw createError(
             'Counter delete failed',
             ErrorTypes.DATABASE,
-            'Failed to delete counter. Please try again.',
+            'فشل في حذف العداد. يرجى المحاولة مرة أخرى.',
             { guildId: guild.id, counterId, operation: 'performDeletionByCounterId' }
         );
     }
@@ -100,21 +101,21 @@ export const performDeletionByCounterId = wrapServiceBoundary(async function per
         }
     }
 
-    let message = `✅ **Counter Deleted Successfully!**\n\n**ID:** \`${counter.id}\`\n**Type:** ${getCounterTypeDisplay(counter.type)}`;
+    let message = `✅ **تم حذف العداد بنجاح!**\n\n**المعرف (ID):** \`${counter.id}\`\n**النوع:** ${getCounterTypeDisplay(counter.type)}`;
 
     if (channelDeleted) {
-        message += `\n**Channel:** ${channel.name} (deleted)`;
+        message += `\n**القناة:** ${channel.name} (تم الحذف)`;
     } else if (channel) {
-        message += `\n**Channel:** ${channel.name} (failed to delete)`;
+        message += `\n**القناة:** ${channel.name} (فشل حذف القناة)`;
     } else {
-        message += `\n**Channel:** Already deleted`;
+        message += `\n**القناة:** محذوفة سابقاً`;
     }
 
     return { message };
 }, {
     service: 'serverstats',
     operation: 'performDeletionByCounterId',
-    userMessage: 'An error occurred while deleting the counter. Please try again.',
+    userMessage: 'حدث خطأ أثناء حذف العداد. يرجى المحاولة مرة أخرى.',
 });
 
 function getCounterTypeDisplay(type) {
