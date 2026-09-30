@@ -2,10 +2,11 @@ import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelT
 import { createEmbed, errorEmbed, successEmbed } from '../../utils/embeds.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { logger } from '../../utils/logger.js';
+
 export default {
     data: new SlashCommandBuilder()
         .setName("firstmsg")
-        .setDescription("Get a link to the first message in this channel")
+        .setDescription("الحصول على رابط أول رسالة في هذه القناة")
         .setDMPermission(false)
         .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages),
     category: "Utility",
@@ -36,7 +37,7 @@ export default {
                 guildId: interaction.guildId
             });
             return await InteractionHelper.safeEditReply(interaction, {
-                embeds: [successEmbed('First Message', "No messages found in this channel!")],
+                embeds: [successEmbed('أول رسالة', "لم يتم العثور على أي رسائل في هذه القناة!")],
             });
         }
 
@@ -45,8 +46,8 @@ export default {
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [
                 successEmbed(
-                    "First Message in #" + interaction.channel.name,
-                    `Message Link: ${messageLink}`
+                    "أول رسالة في #" + interaction.channel.name,
+                    `رابط الرسالة: ${messageLink}`
                 ),
             ],
         });
