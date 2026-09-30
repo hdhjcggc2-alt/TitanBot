@@ -11,19 +11,19 @@ import ticketConfig from './modules/ticket_dashboard.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("ticket")
-        .setDescription("Manages the server's ticket system.")
+        .setDescription("إدارة نظام التذاكر في السيرفر.")
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
         .addSubcommand((subcommand) =>
             subcommand
                 .setName("setup")
                 .setDescription(
-                    "Sets up the ticket creation panel in a specified channel.",
+                    "إعداد لوحة إنشاء التذاكر في روم محدد.",
                 )
                 .addChannelOption((option) =>
                     option
-.setName("panel_channel")
+                        .setName("panel_channel")
                         .setDescription(
-                            "The channel where the ticket panel will be sent.",
+                            "الروم الذي سيتم إرسال لوحة التذاكر فيه.",
                         )
                         .addChannelTypes(ChannelType.GuildText)
                         .setRequired(true),
@@ -33,7 +33,7 @@ export default {
                     option
                         .setName("panel_message")
                         .setDescription(
-                            "The main message/description for the ticket panel.",
+                            "الرسالة الرئيسية/الوصف للوحة التذاكر.",
                         )
                         .setRequired(true),
                 )
@@ -41,7 +41,7 @@ export default {
                     option
                         .setName("button_label")
                         .setDescription(
-                            "The label for the ticket creation button (default: Create Ticket)",
+                            "النص المكتوب على زر إنشاء التذكرة (الافتراضي: إنشاء تذكرة)",
                         )
                         .setRequired(false),
                 )
@@ -49,7 +49,7 @@ export default {
                     option
                         .setName("category")
                         .setDescription(
-                            "The category where new tickets will be created (optional).",
+                            "الفئة (Category) التي ستنشأ فيها التذاكر الجديدة (اختياري).",
                         )
                         .addChannelTypes(ChannelType.GuildCategory)
                         .setRequired(false),
@@ -58,7 +58,7 @@ export default {
                     option
                         .setName("closed_category")
                         .setDescription(
-                            "The category where closed tickets will be moved (optional).",
+                            "الفئة التي سيتم نقل التذاكر المغلقة إليها (اختياري).",
                         )
                         .addChannelTypes(ChannelType.GuildCategory)
                         .setRequired(false),
@@ -67,14 +67,14 @@ export default {
                     option
                         .setName("staff_role")
                         .setDescription(
-                            "The role that can access tickets (optional).",
+                            "الرتبة التي يمكنها الوصول إلى التذاكر (اختياري).",
                         )
                         .setRequired(false),
                 )
                 .addIntegerOption((option) =>
                     option
                         .setName("max_tickets_per_user")
-                        .setDescription("Maximum number of tickets a user can create (default: 3)")
+                        .setDescription("الحد الأقصى للتذاكر التي يمكن للمستخدم فتحها (الافتراضي: 3)")
                         .setMinValue(1)
                         .setMaxValue(10)
                         .setRequired(false),
@@ -82,14 +82,14 @@ export default {
                 .addBooleanOption((option) =>
                     option
                         .setName("dm_on_close")
-                        .setDescription("Send DM to user when their ticket is closed (default: true)")
+                        .setDescription("إرسال رسالة خاصة للمستخدم عند إغلاق تذكرته (الافتراضي: مفعل)")
                         .setRequired(false),
                 ),
         )
         .addSubcommand((subcommand) =>
             subcommand
                 .setName("dashboard")
-                .setDescription("Open the interactive ticket system dashboard"),
+                .setDescription("فتح لوحة التحكم التفاعلية لنظام التذاكر"),
         ),
     category: "ticket",
 
@@ -109,7 +109,7 @@ export default {
                 guildId: interaction.guildId,
                 commandName: 'ticket'
             });
-            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need the `Manage Channels` permission for this action.' });
+            return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'أنت بحاجة إلى صلاحية `إدارة القنوات (Manage Channels)` لاستخدام هذا الأمر.' });
         }
 
         const subcommand = interaction.options.getSubcommand();
@@ -121,7 +121,7 @@ export default {
         if (subcommand === "setup") {
             const existingConfig = await getGuildConfig(client, interaction.guildId);
             if (existingConfig?.ticketPanelChannelId) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `This server already has a ticket system set up (panel in <#${existingConfig.ticketPanelChannelId}>).\n\nOnly one ticket system is supported per server. Use \`/ticket dashboard\` to edit or update the existing setup, or select **Delete System** from the dashboard to remove it and start fresh.` });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `يوجد بالفعل نظام تذاكر مفعّل في هذا السيرفر (اللوحة في <#${existingConfig.ticketPanelChannelId}>).\n\nيُدعم نظام تذاكر واحد فقط لكل سيرفر. استخدم \`/ticket dashboard\` لتعديل أو تحديث الإعدادات الحالية، أو اختر **حذف النظام** من لوحة التحكم لإزالته والبدء من جديد.` });
             }
 
             const panelChannel =
@@ -129,23 +129,23 @@ export default {
             const categoryChannel = interaction.options.getChannel("category");
             const closedCategoryChannel = interaction.options.getChannel("closed_category");
             const staffRole = interaction.options.getRole("staff_role");
-const panelMessage = interaction.options.getString("panel_message") || "Click the button below to create a support ticket.";
+            const panelMessage = interaction.options.getString("panel_message") || "اضغط على الزر أدناه لإنشاء تذكرة دعم فني.";
             const buttonLabel =
                 interaction.options.getString("button_label") ||
-"Create Ticket";
+                "إنشاء تذكرة";
             const maxTicketsPerUser = interaction.options.getInteger("max_tickets_per_user") || 3;
-const dmOnClose = interaction.options.getBoolean("dm_on_close") !== false;
+            const dmOnClose = interaction.options.getBoolean("dm_on_close") !== false;
 
             const setupEmbed = createEmbed({ 
-                title: "Support Tickets", 
-description: panelMessage,
+                title: "تذاكر الدعم الفني", 
+                description: panelMessage,
                 color: getColor('info')
             });
 
             const ticketButton = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
                     .setCustomId("create_ticket")
-.setLabel(buttonLabel)
+                    .setLabel(buttonLabel)
                     .setStyle(ButtonStyle.Primary)
                     .setEmoji("📩"),
             );
@@ -183,28 +183,28 @@ description: panelMessage,
                     });
                 }
 
-                let successMessage = `The ticket creation panel has been sent to ${panelChannel}.`;
+                let successMessage = `تم إرسال لوحة إنشاء التذاكر بنجاح إلى ${panelChannel}.\n`;
                 
                 if (categoryChannel) {
-                    successMessage += `New tickets will be created in the **${categoryChannel.name}** category.`;
+                    successMessage += `سيتم إنشاء التذاكر الجديدة في فئة **${categoryChannel.name}**.\n`;
                 } else {
-                    successMessage += 'New tickets will be created in a new "Tickets" category.';
+                    successMessage += 'سيتم إنشاء التذاكر الجديدة في فئة جديدة باسم "Tickets".\n';
                 }
                 
                 if (closedCategoryChannel) {
-                    successMessage += `Closed tickets will be moved to **${closedCategoryChannel.name}**.`;
+                    successMessage += `سيتم نقل التذاكر المغلقة إلى **${closedCategoryChannel.name}**.\n`;
                 }
                 
                 if (staffRole) {
-                    successMessage += `**${staffRole.name}** role will have access to tickets.`;
+                    successMessage += `رتبة **${staffRole.name}** سيكون لديها صلاحية الوصول للتذاكر.\n`;
                 }
                 
-                successMessage += `\n\n**Max Tickets Per User:** ${maxTicketsPerUser}\n**DM on Close:** ${dmOnClose ? 'Enabled' : 'Disabled'}`;
+                successMessage += `\n**الحد الأقصى للتذاكر لكل مستخدم:** ${maxTicketsPerUser}\n**إرسال رسالة خاصة عند الإغلاق:** ${dmOnClose ? 'مفعل' : 'معطل'}`;
 
                 await InteractionHelper.safeEditReply(interaction, {
                     embeds: [
                         successEmbed(
-                            "Ticket Panel Set Up",
+                            "تم إعداد لوحة التذاكر",
                             successMessage,
                         ),
                     ],
@@ -224,49 +224,49 @@ description: panelMessage,
                 });
 
                 const logEmbed = createEmbed({
-                    title: "Ticket System Setup (Configuration Log)",
-                    description: `The ticket panel was set up in ${panelChannel} by ${interaction.user}.`,
+                    title: "إعداد نظام التذاكر (سجل الإعدادات)",
+                    description: `تم إعداد لوحة التذاكر في ${panelChannel} بواسطة ${interaction.user}.`,
                     color: getColor('warning')
                 })
                     .addFields(
                         {
-                            name: "Panel Channel",
+                            name: "روم اللوحة",
                             value: panelChannel.toString(),
                             inline: true,
                         },
                         {
-                            name: "Ticket Category",
+                            name: "فئة التذاكر",
                             value: categoryChannel
                                 ? categoryChannel.toString()
-                                : "None specified.",
+                                : "لم تحدد.",
                             inline: true,
                         },
                         {
-                            name: "Closed Category",
+                            name: "فئة التذاكر المغلقة",
                             value: closedCategoryChannel
                                 ? closedCategoryChannel.toString()
-                                : "None specified.",
+                                : "لم تحدد.",
                             inline: true,
                         },
                         {
-                            name: "Staff Role",
+                            name: "رتبة الدعم (Staff)",
                             value: staffRole
                                 ? staffRole.toString()
-                                : "None specified.",
+                                : "لم تحدد.",
                             inline: true,
                         },
                         {
-                            name: "Max Tickets Per User",
+                            name: "الحد الأقصى للتذاكر",
                             value: maxTicketsPerUser.toString(),
                             inline: true,
                         },
                         {
-                            name: "DM on Close",
-                            value: dmOnClose ? 'Enabled' : 'Disabled',
+                            name: "إرسال خاص عند الإغلاق",
+                            value: dmOnClose ? 'مفعل' : 'معطل',
                             inline: true,
                         },
                         {
-                            name: "Moderator",
+                            name: "المشرف",
                             value: `${interaction.user.tag} (${interaction.user.id})`,
                             inline: false,
                         },
@@ -281,7 +281,7 @@ description: panelMessage,
                     commandName: 'ticket_setup'
                 });
                 if (interaction.deferred || interaction.replied) {
-                    await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Could not send the ticket panel or save configuration. Check the bot\'s permissions (especially the ability to send messages in the target channel) and database connection.' }).catch(err => {
+                    await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'تعذر إرسال لوحة التذاكر أو حفظ الإعدادات. يرجى التحقق من صلاحيات البوت (خاصة صلاحية إرسال الرسائل في الروم المحدد) والاتصال بقاعدة البيانات.' }).catch(err => {
                         logger.error('Failed to send error reply', {
                             error: err.message,
                             guildId: interaction.guildId
