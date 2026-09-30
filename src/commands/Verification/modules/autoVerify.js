@@ -17,32 +17,32 @@ const defaultAccountAgeDays = autoVerifyDefaults.defaultAccountAgeDays ?? 7;
 export default {
     data: new SlashCommandBuilder()
         .setName("autoverify")
-        .setDescription("Configure automatic verification settings")
+        .setDescription("إعداد وتخصيص نظام التحقق التلقائي")
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
         .addSubcommand(subcommand =>
             subcommand
                 .setName("setup")
-                .setDescription("Set up automatic verification")
+                .setDescription("إعداد نظام التحقق التلقائي في السيرفر")
                 .addRoleOption(option =>
                     option
                         .setName("role")
-                        .setDescription("Role to assign to users who meet auto-verify criteria")
+                        .setDescription("الرتبة الممنوحة للمستخدمين عند استيفاء شروط التحقق التلقائي")
                         .setRequired(true)
                 )
                 .addStringOption(option =>
                     option
                         .setName("criteria")
-                        .setDescription("Criteria for automatic verification")
+                        .setDescription("معيار التحقق التلقائي")
                         .addChoices(
-                            { name: "Account Age", value: "account_age" },
-                            { name: "No Criteria", value: "none" }
+                            { name: "عمر الحساب (Account Age)", value: "account_age" },
+                            { name: "بدون شروط (No Criteria)", value: "none" }
                         )
                         .setRequired(true)
                 )
                 .addIntegerOption(option =>
                     option
                         .setName("account_age_days")
-                        .setDescription("Minimum account age in days (required for account age criteria)")
+                        .setDescription("الحد الأدنى لعمر الحساب بالأيام (مطلوب إذا كان المعيار هو عمر الحساب)")
                         .setMinValue(minAccountAgeDays)
                         .setMaxValue(maxAccountAgeDays)
                         .setRequired(false)
@@ -51,7 +51,7 @@ export default {
         .addSubcommand(subcommand =>
             subcommand
                 .setName("dashboard")
-                .setDescription("Open the auto-verification dashboard for customization")
+                .setDescription("فتح لوحة تحكم التحقق التلقائي للتعديل والتخصيص")
         ),
 
     async execute(interaction, config, client) {
@@ -68,7 +68,7 @@ export default {
                     throw createError(
                         `Unknown subcommand: ${subcommand}`,
                         ErrorTypes.VALIDATION,
-                        "Invalid subcommand selected.",
+                        "تم اختيار أمر فرعي غير صالح.",
                         { subcommand }
                     );
             }
@@ -95,7 +95,7 @@ async function handleSetup(interaction, guild, client) {
             throw createError(
                 'Auto-verify enable blocked by conflicting onboarding system',
                 ErrorTypes.CONFIGURATION,
-                'You cannot enable **AutoVerify** while the verification system or AutoRole is configured. Disable those first.',
+                'لا يمكنك تفعيل **التحقق التلقائي (AutoVerify)** بينما نظام التحقق اليدوي أو الرتب التلقائية (AutoRole) مفعّلة. يرجى تعطيلها أولاً.',
                 {
                     guildId: guild.id,
                     verificationEnabled,
@@ -111,7 +111,7 @@ async function handleSetup(interaction, guild, client) {
             throw createError(
                 'Bot member not found in guild cache',
                 ErrorTypes.CONFIGURATION,
-                'I could not verify my permissions in this server. Please try again in a moment.',
+                'تعذر التحقق من صلاحيات البوت في هذا السيرفر. يرجى المحاولة مرة أخرى بعد قليل.',
                 { guildId: guild.id }
             );
         }
@@ -120,7 +120,7 @@ async function handleSetup(interaction, guild, client) {
             throw createError(
                 'Missing ManageRoles permission',
                 ErrorTypes.PERMISSION,
-                "I need the 'Manage Roles' permission to assign auto-verify roles.",
+                "أحتاج إلى صلاحية **إدارة الرتب (Manage Roles)** لتمكين منح رتب التحقق التلقائي.",
                 { guildId: guild.id }
             );
         }
@@ -129,7 +129,7 @@ async function handleSetup(interaction, guild, client) {
             throw createError(
                 'Invalid auto-verify role selected',
                 ErrorTypes.VALIDATION,
-                'Please choose a normal assignable role (not @everyone or an integration-managed role).',
+                'يرجى اختيار رتبة عادية قابلة للتعيين (ليست @everyone أو رتبة مخصصة للبوتات/الربط).',
                 { guildId: guild.id, roleId: targetRole.id, managed: targetRole.managed }
             );
         }
@@ -138,7 +138,7 @@ async function handleSetup(interaction, guild, client) {
             throw createError(
                 'Role hierarchy error for auto-verify setup',
                 ErrorTypes.PERMISSION,
-                'The selected auto-verify role must be below my highest role in the server role hierarchy.',
+                'يجب أن تكون رتبة التحقق التلقائي المحددة أقل من أعلى رتبة يمتلكها البوت في ترتيب رتب السيرفر.',
                 { guildId: guild.id, roleId: targetRole.id, rolePosition: targetRole.position, botRolePosition: botMember.roles.highest.position }
             );
         }
@@ -162,10 +162,10 @@ async function handleSetup(interaction, guild, client) {
         let criteriaDescription = "";
         switch (criteria) {
             case "account_age":
-                criteriaDescription = `\`${accountAgeDays} days\` old`;
+                criteriaDescription = `عمر الحساب لا يقل عن \`${accountAgeDays} أيام\``;
                 break;
             case "none":
-                criteriaDescription = "All users immediately";
+                criteriaDescription = "جميع الأعضاء فور دخولهم السيرفر";
                 break;
         }
 
@@ -178,8 +178,8 @@ async function handleSetup(interaction, guild, client) {
 
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [successEmbed(
-                "Auto-Verification Configured",
-                `Automatic verification has been configured!\n\n**Role:** ${targetRole}\n**Criteria:** ${criteriaDescription}\n\nUsers who meet these criteria will receive this role when they join the server.`
+                "تم إعداد التحقق التلقائي",
+                `تم إعداد نظام التحقق التلقائي بنجاح!\n\n**الرتبة:** ${targetRole}\n**المعيار:** ${criteriaDescription}\n\nالأعضاء الذين يستوفون هذه الشروط سيحصلون على هذه الرتبة تلقائياً عند انضمامهم للسيرفر.`
             )]
         });
 
