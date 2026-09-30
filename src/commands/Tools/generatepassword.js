@@ -5,27 +5,28 @@ import { createEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/
 import { logger } from '../../utils/logger.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
+
 export default {
     data: new SlashCommandBuilder()
         .setName('generatepassword')
-        .setDescription('Generate a strong, random password')
+        .setDescription('توليد كلمة مرور قوية وعشوائية')
         .addIntegerOption(option =>
             option.setName('length')
-                .setDescription('Password length (default: 16, max: 50)')
+                .setDescription('طول كلمة المرور (الافتراضي: 16، الأقصى: 50)')
                 .setMinValue(8)
                 .setMaxValue(50)
                 .setRequired(false))
         .addBooleanOption(option =>
             option.setName('uppercase')
-                .setDescription('Include uppercase letters (A-Z)')
+                .setDescription('تضمين الأحرف الكبيرة (A-Z)')
                 .setRequired(false))
         .addBooleanOption(option =>
             option.setName('numbers')
-                .setDescription('Include numbers (0-9)')
+                .setDescription('تضمين الأرقام (0-9)')
                 .setRequired(false))
         .addBooleanOption(option =>
             option.setName('symbols')
-                .setDescription('Include symbols (!@#$%^&*)')
+                .setDescription('تضمين الرموز (!@#$%^&*)')
                 .setRequired(false)),
 
     async execute(interaction) {
@@ -48,7 +49,7 @@ export default {
         const includeSymbols = interaction.options.getBoolean('symbols') ?? true;
 
         if (length < 8 || length > 50) {
-            await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: `Password must be 8-50 characters. You provided: ${length}` });
+            await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: `يجب أن يكون طول كلمة المرور بين 8 و 50 حرفاً. القيمة المدخلة: ${length}` });
             return;
         }
 
@@ -89,7 +90,7 @@ export default {
             password = password.substring(0, randomIndex) + randomSymbol + password.substring(randomIndex + 1);
         }
 
-        let strength = 'Weak';
+        let strength = 'ضعيفة';
         let strengthEmoji = '🔴';
         let strengthColor = getColor('error');
 
@@ -114,29 +115,35 @@ export default {
         if (hasSymbol) score *= 1.3;
 
         if (score > 80) {
-            strength = 'Very Strong';
+            strength = 'قوية جداً';
             strengthEmoji = '🟢';
             strengthColor = getColor('success');
         } else if (score > 60) {
-            strength = 'Strong';
+            strength = 'قوية';
             strengthEmoji = '🟢';
             strengthColor = getColor('success');
         } else if (score > 40) {
-            strength = 'Good';
+            strength = 'جيدة';
             strengthEmoji = '🟡';
             strengthColor = getColor('warning');
         } else if (score > 20) {
-            strength = 'Weak';
+            strength = 'ضعيفة';
             strengthEmoji = '🟠';
             strengthColor = getColor('warning');
         }
 
+        const containsList = [];
+        if (hasLower) containsList.push('أحرف صغيرة');
+        if (hasUpper) containsList.push('أحرف كبيرة');
+        if (hasNumber) containsList.push('أرقام');
+        if (hasSymbol) containsList.push('رموز');
+
         const embed = successEmbed(
-            '🔑 Generated Password',
-            `**Password:** ||\`${password}\`||\n` +
-            `**Length:** ${password.length} characters\n` +
-            `**Strength:** ${strengthEmoji} ${strength}\n` +
-            `**Contains:** ${hasLower ? 'Lowercase' : ''}${hasUpper ? ', Uppercase' : ''}${hasNumber ? ', Numbers' : ''}${hasSymbol ? ', Symbols' : ''}`
+            '🔑 كلمة المرور المُولدة',
+            `**كلمة المرور:** ||\`${password}\`||\n` +
+            `**الطول:** ${password.length} أحرف\n` +
+            `**القوة:** ${strengthEmoji} ${strength}\n` +
+            `**تحتوي على:** ${containsList.join('، ')}`
         ).setColor(strengthColor);
 
         await InteractionHelper.safeEditReply(interaction, {
