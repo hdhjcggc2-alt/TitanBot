@@ -20,7 +20,7 @@ export default {
                     word: word,
                     guildId: interaction.guildId
                 });
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Please enter a word with at least 2 characters.' });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'يرجى إدخال كلمة تتكون من حرفين على الأقل.' });
             }
 
             const response = await axios.get(
@@ -29,7 +29,7 @@ export default {
             );
 
             if (!response.data || response.data.length === 0) {
-                return await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `No definitions found for "${word}".` });
+                return await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `لم يتم العثور على تعريفات للكلمة "${word}".` });
             }
 
             const data = response.data[0];
@@ -45,7 +45,7 @@ export default {
                     .map((def, idx) => {
                         let text = `${idx + 1}. ${def.definition}`;
                         if (def.example) {
-                            text += `\n *Example: ${def.example}*`;
+                            text += `\n *مثال: ${def.example}*`;
                         }
                         return text;
                     })
@@ -53,14 +53,14 @@ export default {
 
                 if (definitions) {
                     embed.addFields({
-                        name: `**${meaning.partOfSpeech || 'Definition'}**`,
+                        name: `**${meaning.partOfSpeech || 'التعريف'}**`,
                         value: definitions,
                         inline: false
                     });
                 }
             });
 
-            embed.setFooter({ text: 'Powered by Free Dictionary API' });
+            embed.setFooter({ text: 'مدعوم بواسطة Free Dictionary API' });
 
             await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
 
@@ -82,7 +82,7 @@ export default {
             });
 
             if (error.response?.status === 404) {
-                await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `No definitions found for "${interaction.options.getString('word')}".` });
+                await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: `لم يتم العثور على تعريفات للكلمة "${interaction.options.getString('word')}".` });
             } else {
                 await handleInteractionError(interaction, error, {
                     commandName: 'define',
