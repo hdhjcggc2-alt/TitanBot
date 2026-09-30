@@ -5,6 +5,7 @@ import { logger } from '../../../utils/logger.js';
 
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
+
 export async function handleCreate(interaction, client) {
     const guild = interaction.guild;
     const type = interaction.options.getString("type");
@@ -19,13 +20,13 @@ export async function handleCreate(interaction, client) {
     }
 
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageChannels)) {
-        await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need **Manage Channels** permission to create counters.' }).catch(logger.error);
+        await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'أنت بحاجة إلى صلاحية **إدارة القنوات (Manage Channels)** لإنشاء العدادات.' }).catch(logger.error);
         return;
     }
 
     try {
         if (!category || category.type !== ChannelType.GuildCategory) {
-            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Please select a valid category for the counter channel.' }).catch(logger.error);
+            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'يرجى تحديد فئة (Category) صالحة لقناة العداد.' }).catch(logger.error);
             return;
         }
 
@@ -38,7 +39,7 @@ export async function handleCreate(interaction, client) {
 
         if (duplicateType) {
             const duplicateChannel = guild.channels.cache.get(duplicateType.channelId);
-            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `A **${getCounterTypeLabel(type)}** counter already exists for this server${duplicateChannel ? ` in ${duplicateChannel}` : ''}. Delete it first before creating another.` }).catch(logger.error);
+            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `يوجد بالفعل عداد من نوع **${getCounterTypeLabel(type)}** في هذا السيرفر${duplicateChannel ? ` في ${duplicateChannel}` : ''}. يرجى حذفه أولاً قبل إنشاء عداد آخر.` }).catch(logger.error);
             return;
         }
 
@@ -51,7 +52,7 @@ export async function handleCreate(interaction, client) {
 
         const existingCounter = counters.find(c => c.channelId === targetChannel.id);
         if (existingCounter) {
-            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `A counter already exists for channel **${targetChannel.name}**. Please delete it first or choose a different type.` }).catch(logger.error);
+            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `يوجد بالفعل عداد مرتبطة بالقناة **${targetChannel.name}**. يرجى حذفه أولاً أو اختيار نوع آخر.` }).catch(logger.error);
             return;
         }
 
@@ -69,22 +70,34 @@ export async function handleCreate(interaction, client) {
         const saved = await saveServerCounters(client, guild.id, counters);
         if (!saved) {
             await targetChannel.delete('Counter creation failed during save').catch(() => null);
-            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Failed to save counter data. Please try again.' }).catch(logger.error);
+            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'فشل في حفظ بيانات العداد. يرجى المحاولة مرة أخرى.' }).catch(logger.error);
             return;
         }
 
         const updated = await updateCounter(client, guild, newCounter);
         if (!updated) {
-            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Counter created but failed to update channel name. The counter will update on the next scheduled run.' }).catch(logger.error);
+            await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'تم إنشاء العداد ولكن تعذر تغيير اسم القناة حالياً. سيتم تحديث العداد في التشغيل المجدول القادم.' }).catch(logger.error);
             return;
         }
 
+        const channelTypeAr = targetChannel.type === ChannelType.GuildVoice ? 'صوتية' : 'كتابية';
+
         await InteractionHelper.safeEditReply(interaction, {
-            embeds: [successEmbed(`**Counter Created Successfully!**\n\n**Type:** ${getCounterTypeLabel(type)}\n**Channel Type:** ${targetChannel.type === ChannelType.GuildVoice ? 'voice' : 'text'}\n**Category:** ${category}\n**Channel:** ${targetChannel}\n**Channel Name:** ${targetChannel.name}\n**Counter ID:** \`${newCounter.id}\`\n\nThe counter will automatically update every 15 minutes.\n\nUse \`/serverstats list\` to view all counters.`)]
+            embeds: [successEmbed(
+                "تم إنشاء العداد بنجاح!",
+                `**النوع:** ${getCounterTypeLabel(type)}\n` +
+                `**نوع القناة:** ${channelTypeAr}\n` +
+                `**الفئة:** ${category}\n` +
+                `**القناة:** ${targetChannel}\n` +
+                `**اسم القناة:** ${targetChannel.name}\n` +
+                `**معرف العداد:** \`${newCounter.id}\`\n\n` +
+                `سيتم تحديث العداد تلقائياً كل 15 دقيقة.\n\n` +
+                `استخدم الأمر \`/serverstats list\` لعرض كافة العدادات.`
+            )]
         }).catch(logger.error);
 
     } catch (error) {
         logger.error("Error creating counter:", error);
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while creating the counter. Please try again.' }).catch(logger.error);
+        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'حدث خطأ أثناء إنشاء العداد. يرجى المحاولة مرة أخرى.' }).catch(logger.error);
     }
 }
