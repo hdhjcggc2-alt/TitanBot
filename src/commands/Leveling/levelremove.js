@@ -4,28 +4,28 @@ import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 import { checkUserPermissions } from '../../utils/permissionGuard.js';
 import { removeLevels, getUserLevelData, getLevelingConfig } from '../../services/leveling/leveling.js';
 import { createEmbed } from '../../utils/embeds.js';
-
 import { InteractionHelper } from '../../utils/interactionHelper.js';
+
 export default {
   data: new SlashCommandBuilder()
     .setName('levelremove')
-    .setDescription('Remove levels from a user')
+    .setDescription('إزالة مستويات من مستخدم معين')
     .addUserOption((option) =>
       option
         .setName('user')
-        .setDescription('The user to remove levels from')
+        .setDescription('المستخدم المراد إزالة المستويات منه')
         .setRequired(true)
     )
     .addIntegerOption((option) =>
       option
         .setName('levels')
-        .setDescription('Number of levels to remove')
+        .setDescription('عدد المستويات المراد إزالتها')
         .setRequired(true)
         .setMinValue(1)
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .setDMPermission(false),
-  category: 'Leveling',
+  category: 'المستويات',
 
   async execute(interaction, config, client) {
     await InteractionHelper.safeDefer(interaction);
@@ -33,7 +33,7 @@ export default {
     const hasPermission = await checkUserPermissions(
       interaction,
       PermissionFlagsBits.ManageGuild,
-      'You need ManageGuild permission to use this command.'
+      'عذراً، تحتاج إلى صلاحية إدارة السيرفر (ManageGuild) لاستخدام هذا الأمر.'
     );
     if (!hasPermission) return;
 
@@ -43,7 +43,7 @@ export default {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
-            .setDescription('The leveling system is currently disabled on this server.')
+            .setDescription('⚠️ نظام المستويات معطل حالياً في هذا السيرفر.')
         ],
         flags: MessageFlags.Ephemeral
       });
@@ -58,7 +58,7 @@ export default {
       throw new TitanBotError(
         `User ${targetUser.id} not found in this guild`,
         ErrorTypes.USER_INPUT,
-        'The specified user is not in this server.'
+        'المستخدم المحدد غير موجود في هذا السيرفر.'
       );
     }
 
@@ -67,7 +67,7 @@ export default {
       throw new TitanBotError(
         `User ${targetUser.id} is already at minimum level`,
         ErrorTypes.VALIDATION,
-        `${targetUser.tag} is already at level 0 and cannot have levels removed.`
+        `المستخدم ${targetUser.tag} في المستوى 0 بالفعل ولا يمكن إزالة مستويات إضافية منه.`
       );
     }
 
@@ -76,8 +76,8 @@ export default {
     await InteractionHelper.safeEditReply(interaction, {
       embeds: [
         createEmbed({
-          title: 'Levels Removed',
-          description: `Successfully removed ${levelsToRemove} levels from ${targetUser.tag}.\n**New Level:** ${updatedData.level}`,
+          title: 'تم إزالة المستويات',
+          description: `تم بنجاح إزالة ${levelsToRemove} مستوى من المستخدم ${targetUser.tag}.\n**المستوى الجديد:** ${updatedData.level}`,
           color: 'success'
         })
       ]
