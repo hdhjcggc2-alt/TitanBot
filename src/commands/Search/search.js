@@ -8,32 +8,32 @@ import searchUrban from './modules/search_urban.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('search')
-        .setDescription('Search the web and dictionaries')
+        .setDescription('البحث في الويب والمعاجم')
         .addSubcommand(subcommand =>
             subcommand
                 .setName('define')
-                .setDescription('Look up a word definition')
+                .setDescription('البحث عن تعريف كلمة')
                 .addStringOption(option =>
                     option.setName('word')
-                        .setDescription('The word to look up')
+                        .setDescription('الكلمة المراد البحث عن تعريفها')
                         .setRequired(true))
         )
         .addSubcommand(subcommand =>
             subcommand
                 .setName('google')
-                .setDescription('Search Google')
+                .setDescription('البحث في محرك جوجل')
                 .addStringOption(option =>
                     option.setName('query')
-                        .setDescription('What would you like to search for?')
+                        .setDescription('عن ماذا ترغب في البحث؟')
                         .setRequired(true))
         )
         .addSubcommand(subcommand =>
             subcommand
                 .setName('urban')
-                .setDescription('Search Urban Dictionary for definitions')
+                .setDescription('البحث عن مصطلح في معجم Urban Dictionary')
                 .addStringOption(option =>
                     option.setName('term')
-                        .setDescription('The term to look up on Urban Dictionary')
+                        .setDescription('المصطلح المراد البحث عنه')
                         .setRequired(true))
         ),
 
@@ -48,7 +48,7 @@ export default {
             case 'urban':
                 return await searchUrban.execute(interaction, config, client);
             default:
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Unknown subcommand' });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'أمر فرعي غير معروف' });
         }
     }
 };
