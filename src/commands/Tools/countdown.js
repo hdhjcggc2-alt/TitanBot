@@ -11,11 +11,11 @@ export { activeCountdowns };
 export default {
     data: new SlashCommandBuilder()
         .setName("countdown")
-        .setDescription("Start a countdown timer")
+        .setDescription("بدء مؤقت تنازلي")
         .addIntegerOption((option) =>
             option
                 .setName("minutes")
-                .setDescription("Number of minutes to count down (0-1440)")
+                .setDescription("عدد الدقائق للمؤقت (0-1440)")
                 .setMinValue(0)
                 .setMaxValue(1440)
                 .setRequired(false),
@@ -23,7 +23,7 @@ export default {
         .addIntegerOption((option) =>
             option
                 .setName("seconds")
-                .setDescription("Number of seconds to count down (0-59)")
+                .setDescription("عدد الثواني للمؤقت (0-59)")
                 .setMinValue(0)
                 .setMaxValue(59)
                 .setRequired(false),
@@ -31,7 +31,7 @@ export default {
         .addStringOption((option) =>
             option
                 .setName("title")
-                .setDescription("Optional title for the countdown")
+                .setDescription("عنوان اختياري للمؤقت")
                 .setRequired(false),
         ),
 
@@ -48,16 +48,16 @@ export default {
 
         const minutes = interaction.options.getInteger("minutes") || 0;
         const seconds = interaction.options.getInteger("seconds") || 0;
-        const title = interaction.options.getString("title") || "Countdown Timer";
+        const title = interaction.options.getString("title") || "المؤقت التنازلي";
 
         const totalSeconds = minutes * 60 + seconds;
 
         if (totalSeconds <= 0) {
-            throw new Error("Please specify a duration of at least 1 second.");
+            throw new Error("يرجى تحديد مدة لا تقل عن ثانية واحدة.");
         }
 
         if (totalSeconds > 86400) {
-            throw new Error("Countdown cannot be longer than 24 hours.");
+            throw new Error("لا يمكن أن تتجاوز مدة المؤقت 24 ساعة.");
         }
 
         const endTime = Date.now() + totalSeconds * 1000;
@@ -67,7 +67,7 @@ export default {
 
         const initialEmbed = successEmbed(
             `⏱️ ${title}`,
-            `Time remaining: **${formatTime(totalSeconds)}**`,
+            `الوقت المتبقي: **${formatTime(totalSeconds)}**`,
         );
 
         const message = await interaction.channel.send({
@@ -89,7 +89,7 @@ export default {
         startCountdown(countdownId, countdownData, activeCountdowns);
 
         await InteractionHelper.safeEditReply(interaction, {
-            content: "✅ Countdown started!",
+            content: "✅ تم بدء المؤقت التنازلي بنجاح!",
             flags: MessageFlags.Ephemeral,
         });
     },
