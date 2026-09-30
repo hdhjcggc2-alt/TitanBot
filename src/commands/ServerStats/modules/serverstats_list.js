@@ -6,6 +6,7 @@ import { logger } from '../../../utils/logger.js';
 
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { replyUserError, ErrorTypes } from '../../../utils/errorHandler.js';
+
 export async function handleList(interaction, client) {
     const guild = interaction.guild;
 
@@ -17,7 +18,7 @@ export async function handleList(interaction, client) {
     }
 
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageChannels)) {
-        await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need **Manage Channels** permission to view counters.' }).catch(logger.error);
+        await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'أنت بحاجة إلى صلاحية **إدارة القنوات (Manage Channels)** لعرض العدادات.' }).catch(logger.error);
         return;
     }
 
@@ -45,25 +46,25 @@ export async function handleList(interaction, client) {
 
         if (validCounters.length === 0) {
             const embed = createEmbed({
-                title: "Server Counters",
-                description: "No counters have been set up for this server yet.\n\nUse `/serverstats create` to set up your first counter!",
+                title: "عدادات السيرفر",
+                description: "لم يتم إعداد أي عدادات لهذا السيرفر حتى الآن.\n\nاستخدم الأمر `/serverstats create` لإنشاء أول عداد لك!",
                 color: getColor('warning')
             });
 
             embed.addFields({
-                name: "**Available Counter Types**",
-                value: "**Members + Bots** - Total server members\n **Members Only** - Human members only\n **Bots Only** - Bot members only",
+                name: "**أنواع العدادات المتاحة**",
+                value: "**الأعضاء + البوتات** - إجمالي أعضاء السيرفر\n **الأعضاء فقط** - الأعضاء البشريين فقط\n **البوتات فقط** - البوتات المضافة للسيرفر فقط",
                 inline: false
             });
 
             embed.addFields({
-                name: "**Usage Examples**",
+                name: "**أمثلة الاستخدام**",
                 value: "`/serverstats create type:members channel_type:voice category:Stats`\n`/serverstats create type:bots channel_type:text category:Server Info`\n`/serverstats list`",
                 inline: false
             });
 
             embed.setFooter({ 
-                text: "Counter System • Automatic updates every 15 minutes" 
+                text: "نظام العدادات • يتم التحديث التلقائي كل 15 دقيقة" 
             });
 
             await InteractionHelper.safeEditReply(interaction, { embeds: [embed] }).catch(logger.error);
@@ -71,8 +72,8 @@ export async function handleList(interaction, client) {
         }
 
         const embed = createEmbed({
-            title: `Server Counters (${validCounters.length})`,
-            description: "Here are all the active counters for this server.\n\nCounters automatically update every 15 minutes.",
+            title: `عدادات السيرفر (${validCounters.length})`,
+            description: "إليك جميع العدادات المفعّلة حالياً في هذا السيرفر.\n\nتتحدث العدادات تلقائياً كل 15 دقيقة.",
             color: getColor('info')
         });
 
@@ -81,38 +82,37 @@ export async function handleList(interaction, client) {
             const channel = guild.channels.cache.get(counter.channelId);
             
             if (!channel) {
-                
                 logger.warn(`Counter ${counter.id} still has missing channel after cleanup`);
                 continue;
             }
 
             const currentCount = getCurrentCount(stats, counter.type);
-            const status = channel.name.includes(':') ? '✅ Active' : '⚠️ Not Updated';
+            const status = channel.name.includes(':') ? '✅ نشط' : '⚠️ لم يحدث بعد';
             
             embed.addFields({
-                name: `${getCounterTypeEmoji(counter.type)} Counter #${i + 1} - ${channel.name}`,
-                value: `**ID:** \`${counter.id}\`\n**Type:** ${getCounterTypeDisplay(counter.type)}\n**Channel:** ${channel}\n**Current Count:** ${currentCount}\n**Status:** ${status}\n**Created:** ${new Date(counter.createdAt).toLocaleDateString()}`,
+                name: `${getCounterTypeEmoji(counter.type)} عداد رقم ${i + 1} - ${channel.name}`,
+                value: `**المعرف (ID):** \`${counter.id}\`\n**النوع:** ${getCounterTypeDisplay(counter.type)}\n**القناة:** ${channel}\n**العدد الحالي:** ${currentCount}\n**الحالة:** ${status}\n**تاريخ الإنشاء:** ${new Date(counter.createdAt).toLocaleDateString('ar-EG')}`,
                 inline: false
             });
         }
 
         embed.addFields({
-            name: "**Statistics**",
-            value: `**Total Counters:** ${validCounters.length}\n**Active Counters:** ${validCounters.filter(c => {
+            name: "**الإحصائيات**",
+            value: `**إجمالي العدادات:** ${validCounters.length}\n**العدادات النشطة:** ${validCounters.filter(c => {
                 const channel = guild.channels.cache.get(c.channelId);
                 return channel && channel.name.includes(':');
-            }).length}\n**Next Update:** <t:${Math.floor(Date.now() / 1000) + 900}:R>`,
+            }).length}\n**التحديث القادم:** <t:${Math.floor(Date.now() / 1000) + 900}:R>`,
             inline: false
         });
 
         embed.addFields({
-            name: "**Management Commands**",
-            value: "`/serverstats create` - Create new counter\n`/serverstats update` - Update existing counter\n`/serverstats delete` - Delete counter",
+            name: "**أوامر الإدارة**",
+            value: "`/serverstats create` - إنشاء عداد جديد\n`/serverstats update` - تحديث عداد موجود\n`/serverstats delete` - حذف عداد",
             inline: false
         });
 
         embed.setFooter({ 
-            text: "Counter System • Automatic updates every 15 minutes" 
+            text: "نظام العدادات • يتم التحديث التلقائي كل 15 دقيقة" 
         });
         embed.setTimestamp();
 
@@ -120,7 +120,7 @@ export async function handleList(interaction, client) {
 
     } catch (error) {
         logger.error("Error displaying counters:", error);
-        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while fetching counters. Please try again.' }).catch(logger.error);
+        await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'حدث خطأ أثناء جلب العدادات. يرجى المحاولة مرة أخرى.' }).catch(logger.error);
     }
 }
 
