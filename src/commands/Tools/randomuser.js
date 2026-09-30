@@ -8,22 +8,22 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('randomuser')
-        .setDescription('Select a random user from the server')
+        .setDescription('تحديد مستخدم عشوائي من السيرفر')
         .addRoleOption(option =>
             option.setName('role')
-                .setDescription('Limit selection to users with this role')
+                .setDescription('حصر الاختيار على المستخدمين الذين يحملون هذه الرتبة')
                 .setRequired(false))
         .addBooleanOption(option =>
             option.setName('bots')
-                .setDescription('Include bots in the selection (default: false)')
+                .setDescription('تضمين البوتات في الاختيار (الافتراضي: لا)')
                 .setRequired(false))
         .addBooleanOption(option =>
             option.setName('online')
-                .setDescription('Only select from online users (default: false)')
+                .setDescription('الاختيار من المستخدمين المتصلين (Online) فقط (الافتراضي: لا)')
                 .setRequired(false))
         .addBooleanOption(option =>
             option.setName('mention')
-                .setDescription('Mention the selected user (default: false)')
+                .setDescription('عمل منشن للمستخدم المحدد (الافتراضي: لا)')
                 .setRequired(false)),
 
     async execute(interaction) {
@@ -40,7 +40,7 @@ export default {
         if (!interaction.guild) {
             return replyUserError(interaction, {
                 type: ErrorTypes.VALIDATION,
-                message: 'This command can only be used in a server/guild.',
+                message: 'يمكن استخدام هذا الأمر فقط داخل السيرفرات.',
             });
         }
 
@@ -66,14 +66,14 @@ export default {
         }
 
         if (memberArray.length === 0) {
-            let errorMessage = 'Could not find any users matching your filters:';
-            if (role) errorMessage = `No users have the **${role.name}** role.`;
-            if (onlineOnly) errorMessage = 'No users are currently online.';
-            if (role && onlineOnly) errorMessage = `No **${role.name}** members are online.`;
+            let errorMessage = 'لم يتم العثور على أي مستخدمين يطابقون خيارات التصفية:';
+            if (role) errorMessage = `لا يوجد مستخدمون يحملون رتبة **${role.name}**.`;
+            if (onlineOnly) errorMessage = 'لا يوجد مستخدمون متصلون حالياً.';
+            if (role && onlineOnly) errorMessage = `لا يوجد أعضاء متصلون يحملون رتبة **${role.name}**.`;
 
             return replyUserError(interaction, {
                 type: ErrorTypes.USER_INPUT,
-                message: errorMessage + '\n\nTry adjusting your filters.',
+                message: errorMessage + '\n\nجرب تعديل خيارات التصفية.',
             });
         }
 
@@ -89,14 +89,14 @@ export default {
             .slice(0, 10);
 
         const embed = successEmbed(
-            '🎲 Random User Selected',
+            '🎲 تم اختيار مستخدم عشوائي',
             shouldMention ? `${selectedMember}` : `**${user.username}**`
         )
         .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 256 }))
         .addFields(
-            { name: 'Username', value: user.username, inline: true },
-            { name: 'Bot', value: user.bot ? 'Yes' : 'No', inline: true },
-            { name: `Roles (${roles.length})`, value: roles.length > 0 ? roles.slice(0, 5).join('') + (roles.length > 5 ? `+${roles.length - 5} more` : '') : 'No roles', inline: false }
+            { name: 'اسم المستخدم', value: user.username, inline: true },
+            { name: 'بوت', value: user.bot ? 'نعم' : 'لا', inline: true },
+            { name: `الرتب (${roles.length})`, value: roles.length > 0 ? roles.slice(0, 5).join(' ') + (roles.length > 5 ? ` +${roles.length - 5} أخرى` : '') : 'لا توجد رتب', inline: false }
         )
         .setColor('primary');
 
@@ -104,12 +104,12 @@ export default {
             .addComponents(
                 new ButtonBuilder()
                     .setCustomId(`randomuser_${interaction.user.id}_again`)
-                    .setLabel('🎲 Pick Another User')
+                    .setLabel('🎲 اختيار مستخدم آخر')
                     .setStyle(ButtonStyle.Primary)
             );
 
         const response = await interaction.editReply({
-            content: shouldMention ? `${selectedMember}, you've been chosen!` : null,
+            content: shouldMention ? `${selectedMember}، تم اختيارك!` : null,
             embeds: [embed],
             components: [row],
             allowedMentions: { users: shouldMention ? [user.id] : [] }
@@ -139,7 +139,7 @@ export default {
                 if (newMemberArray.length === 0) {
                     await replyUserError(i, {
                         type: ErrorTypes.USER_INPUT,
-                        message: 'No users found matching the criteria.',
+                        message: 'لم يتم العثور على أي مستخدمين يطابقون المعايير.',
                     });
                     return;
                 }
@@ -155,19 +155,19 @@ export default {
                     .slice(0, 10);
 
                 const newEmbed = successEmbed(
-                    '🎲 Random User Selected',
+                    '🎲 تم اختيار مستخدم عشوائي',
                     shouldMention ? `${newSelectedMember}` : `**${newUser.username}**`
                 )
                 .setThumbnail(newUser.displayAvatarURL({ dynamic: true, size: 256 }))
                 .addFields(
-                    { name: 'Username', value: newUser.username, inline: true },
-                    { name: 'Bot', value: newUser.bot ? 'Yes' : 'No', inline: true },
-                    { name: `Roles (${newRoles.length})`, value: newRoles.length > 0 ? newRoles.slice(0, 5).join('') + (newRoles.length > 5 ? `+${newRoles.length - 5} more` : '') : 'No roles', inline: false }
+                    { name: 'اسم المستخدم', value: newUser.username, inline: true },
+                    { name: 'بوت', value: newUser.bot ? 'نعم' : 'لا', inline: true },
+                    { name: `الرتب (${newRoles.length})`, value: newRoles.length > 0 ? newRoles.slice(0, 5).join(' ') + (newRoles.length > 5 ? ` +${newRoles.length - 5} أخرى` : '') : 'لا توجد رتب', inline: false }
                 )
                 .setColor(newSelectedMember.displayHexColor || '#3498db');
 
                 await i.update({
-                    content: shouldMention ? `${newSelectedMember}, you've been chosen!` : null,
+                    content: shouldMention ? `${newSelectedMember}، تم اختيارك!` : null,
                     embeds: [newEmbed],
                     components: [row],
                     allowedMentions: { users: shouldMention ? [newUser.id] : [] }
@@ -176,7 +176,7 @@ export default {
             } catch (error) {
                 logger.error('Button interaction error:', error);
                 await i.reply({
-                    content: 'An error occurred while selecting another user.',
+                    content: 'حدث خطأ أثناء اختيار مستخدم آخر.',
                     flags: ['Ephemeral']
                 });
             }
