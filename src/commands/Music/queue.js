@@ -4,12 +4,12 @@ import { buildQueueReply } from '../../services/music/musicActions.js';
 
 export default {
     slashOnly: true,
-    category: 'Music',
+    category: 'الموسيقى',
     data: new SlashCommandBuilder()
         .setName('queue')
-        .setDescription('Show the current music queue')
+        .setDescription('عرض قائمة انتظار الموسيقى الحالية')
         .addIntegerOption((opt) =>
-            opt.setName('page').setDescription('Page number').setMinValue(1),
+            opt.setName('page').setDescription('رقم الصفحة').setMinValue(1),
         ),
 
     async execute(interaction, config, client) {
