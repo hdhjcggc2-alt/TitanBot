@@ -4,10 +4,10 @@ import { joinVoiceChannel, replyMusicSuccess } from '../../services/music/musicA
 import { deferMusicCommand } from '../../services/music/prefixSupport.js';
 
 export default {
-    category: 'Music',
+    category: 'الموسيقى',
     data: new SlashCommandBuilder()
         .setName('join')
-        .setDescription('Join your voice channel without starting playback'),
+        .setDescription('الانضمام إلى القناة الصوتية الخاصة بك دون بدء التشغيل'),
 
     async execute(interaction, config, client) {
         const deferred = await deferMusicCommand(interaction);
