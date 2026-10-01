@@ -13,7 +13,7 @@ const SUCCESS_CHANCE = 0.7;
 export default {
     data: new SlashCommandBuilder()
         .setName('beg')
-        .setDescription('Beg for a small amount of money'),
+        .setDescription('التوسل للحصول على مبلغ مالي بسيط'),
 
     execute: withErrorHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
@@ -28,7 +28,7 @@ export default {
                 throw createError(
                     "Failed to load economy data",
                     ErrorTypes.DATABASE,
-                    "Failed to load your economy data. Please try again later.",
+                    "فشل في تحميل بيانات الاقتصاد الخاصة بك. يرجى المحاولة مرة أخرى لاحقاً.",
                     { userId, guildId }
                 );
             }
@@ -41,12 +41,12 @@ export default {
                 const seconds = Math.floor((remainingTime % 60000) / 1000);
 
                 let timeMessage =
-                    minutes > 0 ? `${minutes} minute(s)` : `${seconds} second(s)`;
+                    minutes > 0 ? `${minutes} دقيقة` : `${seconds} ثانية`;
 
                 throw createError(
                     "Beg cooldown active",
                     ErrorTypes.RATE_LIMIT,
-                    `You are tired from begging! Try again in **${timeMessage}**.`,
+                    `أنت متعب من التوسل! حاول مرة أخرى بعد **${timeMessage}**.`,
                     { remainingTime, minutes, seconds, cooldownType: 'beg' }
                 );
             }
@@ -63,34 +63,34 @@ export default {
                 newCash += amountWon;
 
                 const successMessages = [
-                    `A kind stranger drops **$${amountWon.toLocaleString()}** into your cup.`,
-                    `You spotted an unattended wallet! You grab **$${amountWon.toLocaleString()}** and run.`,
-                    `Someone took pity on you and gave you **$${amountWon.toLocaleString()}**!`,
-                    `You found **$${amountWon.toLocaleString()}** under a park bench.`,
+                    `ألقى شخص لطيف مبلغ **$${amountWon.toLocaleString()}** في كوبك.`,
+                    `لقد لمحت محفظة منسية! التقطت مبلغ **$${amountWon.toLocaleString()}** وهربت.`,
+                    `أشفق عليك أحدهم وأعطاك **$${amountWon.toLocaleString()}**!`,
+                    `وجدت مبلغ **$${amountWon.toLocaleString()}** تحت مقعد في الحديقة.`,
                 ];
 
                 replyEmbed = successEmbed(
-                    'Begging Successful',
+                    'عملية توسل ناجحة',
                     successMessages[
                         Math.floor(Math.random() * successMessages.length)
                     ]
                 );
             } else {
                 const failMessages = [
-                    "The police chased you off. You got nothing.",
-                    "Someone yelled, 'Get a job!' and walked past.",
-                    "A squirrel stole the single coin you had.",
-                    "You tried to beg, but you were too embarrassed and gave up.",
+                    "طاردتك الشرطة، ولم تحصل على أي شيء.",
+                    "صرخ أحدهم في وجهك: 'ابحث عن عمل!' ومضى في طريقه.",
+                    "سرق سنجاب العملة المعدنية الوحيدة التي كانت معك.",
+                    "حاولت التوسل، لكنك شعرت بالحرج الشديد وتراجعْت.",
                 ];
 
                 replyEmbed = warningEmbed(
-                    'Insufficient Funds',
+                    'محاولة فاشلة',
                     failMessages[Math.floor(Math.random() * failMessages.length)]
                 );
             }
 
             userData.wallet = newCash;
-userData.lastBeg = Date.now();
+            userData.lastBeg = Date.now();
 
             await setEconomyData(client, guildId, userId, userData);
 
