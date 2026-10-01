@@ -7,10 +7,10 @@ export default {
     category: 'الموسيقى',
     data: new SlashCommandBuilder()
         .setName('play')
-        .setDescription('تشغيل أغنية أو إضافتها إلى قائمة الانتظار')
+        .setDescription('تشغيل أغنية أو إضافتها إلى قائمة الانتظار عبر البحث أو الرابط')
         .addStringOption((opt) =>
             opt.setName('query')
-               .setDescription('اسم الأغنية، رابط مباشر، أو مصطلح بحث')
+               .setDescription('اكتب اسم الأغنية، الفنان، أو الصق الرابط مباشرة')
                .setRequired(true),
         )
         .addStringOption((opt) =>
@@ -33,10 +33,13 @@ export default {
         let query = interaction.options.getString('query').trim();
         const platform = interaction.options.getString('platform');
 
-        // إذا قام المستخدم بتحديد منصة بحث معينة ولم يكن النص رابطاً مباشراً، نقوم بدمج البادئة الخاصة بها
+        // إذا لم يكن الإدخال رابطاً مباشراً وتم تحديد منصة بحث، نقوم بدمج البادئة المناسبة تماماً مثل المنصات الكبرى
         const isUrl = /^https?:\/\//i.test(query);
         if (platform && !isUrl) {
             query = `${platform}:${query}`;
+        } else if (!isUrl) {
+            // البادئة الافتراضية للبحث في حال لم يحدد المستخدم منصة (مثل البحث عن الأغاني بالاسم)
+            query = `ytsearch:${query}`;
         }
 
         const result = await playQuery(client, interaction, query);
