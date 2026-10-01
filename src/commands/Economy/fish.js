@@ -10,29 +10,29 @@ const BASE_MAX_REWARD = 900;
 const FISHING_ROD_MULTIPLIER = 1.5;
 
 const FISH_TYPES = [
-    { name: 'Bass', emoji: '🐟', rarity: 'common' },
-    { name: 'Salmon', emoji: '🐟', rarity: 'common' },
-    { name: 'Trout', emoji: '🐟', rarity: 'common' },
-    { name: 'Tuna', emoji: '🐠', rarity: 'uncommon' },
-    { name: 'Swordfish', emoji: '🐠', rarity: 'uncommon' },
-    { name: 'Octopus', emoji: '🐙', rarity: 'rare' },
-    { name: 'Lobster', emoji: '🦞', rarity: 'rare' },
-    { name: 'Shark', emoji: '🦈', rarity: 'epic' },
-    { name: 'Whale', emoji: '🐋', rarity: 'legendary' },
+    { name: 'سمك القاروص (Bass)', emoji: '🐟', rarity: 'common' },
+    { name: 'سمك السلمون (Salmon)', emoji: '🐟', rarity: 'common' },
+    { name: 'سمك التراوت (Trout)', emoji: '🐟', rarity: 'common' },
+    { name: 'سمك التونة (Tuna)', emoji: '🐠', rarity: 'uncommon' },
+    { name: 'سمك أبو سيف (Swordfish)', emoji: '🐠', rarity: 'uncommon' },
+    { name: 'أخطبوط (Octopus)', emoji: '🐙', rarity: 'rare' },
+    { name: 'سرطان البحر (Lobster)', emoji: '🦞', rarity: 'rare' },
+    { name: 'سمك القرش (Shark)', emoji: '🦈', rarity: 'epic' },
+    { name: 'حوت (Whale)', emoji: '🐋', rarity: 'legendary' },
 ];
 
 const CATCH_MESSAGES = [
-    "You cast your line into the crystal clear waters...",
-    "You wait patiently as your bobber floats...",
-    "After a few minutes of waiting, you feel a tug...",
-    "The water ripples as something takes your bait...",
-    "You reel in your catch with expert precision...",
+    "لقد قمت برمي صنارتك في المياه صافية الصفاء...",
+    "أنت تنتظر بصبر بينما تعوم عوامة الصيد الخاصة بك...",
+    "بعد دقائق قليلة من الانتظار، تشعر بشدّة في الصنارة...",
+    "تتموج المياه عندما يلتقط شيء ما طعمك...",
+    "أنت تسحب صيدتك بدقة ومهارة فائقة...",
 ];
 
 export default {
     data: new SlashCommandBuilder()
         .setName('fish')
-        .setDescription('Go fishing to catch fish and earn money'),
+        .setDescription('الذهاب للصيد لاصطياد الأسماك وكسب الأموال'),
 
     execute: withErrorHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
@@ -43,8 +43,19 @@ export default {
             const now = Date.now();
 
             const userData = await getEconomyData(client, guildId, userId);
+            
+            if (!userData) {
+                throw createError(
+                    "Failed to load economy data",
+                    ErrorTypes.DATABASE,
+                    "فشل تحميل بيانات الاقتصاد الخاصة بك. يرجى المحاولة مرة أخرى لاحقاً.",
+                    { userId, guildId }
+                );
+            }
+
             const lastFish = userData.lastFish || 0;
-            const hasFishingRod = userData.inventory["fishing_rod"] || 0;
+            const inventory = userData.inventory || {};
+            const hasFishingRod = inventory["fishing_rod"] || 0;
 
             if (now < lastFish + FISH_COOLDOWN) {
                 const remaining = lastFish + FISH_COOLDOWN - now;
@@ -56,7 +67,7 @@ export default {
                 throw createError(
                     "Fishing cooldown active",
                     ErrorTypes.RATE_LIMIT,
-                    `You're too tired to fish right now. Rest for **${hours}h ${minutes}m** before fishing again.`,
+                    `أنت متعب قليلاً ولا يمكنك الصيد الآن. استرح لمدة **${hours} ساعة و ${minutes} دقيقة** قبل الصيد مرة أخرى.`,
                     { remaining, cooldownType: 'fish' }
                 );
             }
@@ -65,19 +76,14 @@ export default {
             let fishCaught;
             
             if (rand < 0.5) {
-                
                 fishCaught = FISH_TYPES.filter(f => f.rarity === 'common')[Math.floor(Math.random() * 3)];
             } else if (rand < 0.75) {
-                
                 fishCaught = FISH_TYPES.filter(f => f.rarity === 'uncommon')[Math.floor(Math.random() * 2)];
             } else if (rand < 0.9) {
-                
                 fishCaught = FISH_TYPES.filter(f => f.rarity === 'rare')[Math.floor(Math.random() * 2)];
             } else if (rand < 0.98) {
-                
                 fishCaught = FISH_TYPES.find(f => f.rarity === 'epic');
             } else {
-                
                 fishCaught = FISH_TYPES.find(f => f.rarity === 'legendary');
             }
 
@@ -90,12 +96,12 @@ export default {
 
             if (hasFishingRod > 0) {
                 finalEarned = Math.floor(baseEarned * FISHING_ROD_MULTIPLIER);
-                multiplierMessage = `\n🎣 **Fishing Rod Bonus: +50%**`;
+                multiplierMessage = `\n🎣 **مكافأة صنارة الصيد: +50%**`;
             }
 
             const catchMessage = CATCH_MESSAGES[Math.floor(Math.random() * CATCH_MESSAGES.length)];
 
-            userData.wallet += finalEarned;
+            userData.wallet = (userData.wallet || 0) + finalEarned;
             userData.lastFish = now;
 
             await setEconomyData(client, guildId, userId, userData);
@@ -108,24 +114,32 @@ export default {
                 legendary: '#F1C40F'
             };
 
+            const rarityNamesArabic = {
+                common: 'شائع',
+                uncommon: 'غير شايع',
+                rare: 'نادر',
+                epic: 'ملحمي',
+                legendary: 'أسطوري'
+            };
+
             const embed = createEmbed({
-                title: 'Fishing Success!',
-                description: `${catchMessage}\n\nYou caught a **${fishCaught.emoji} ${fishCaught.name}**! You sold it for **$${finalEarned.toLocaleString()}**!${multiplierMessage}`,
+                title: 'نجحت رحلة الصيد!',
+                description: `${catchMessage}\n\nلقد صطدت **${fishCaught.emoji} ${fishCaught.name}**! لقد قمت ببيعها مقابل **$${finalEarned.toLocaleString()}**!${multiplierMessage}`,
                 color: rarityColors[fishCaught.rarity]
             })
                 .addFields(
                     {
-                        name: "New Cash Balance",
+                        name: "رصيد النقود الجديد",
                         value: `$${userData.wallet.toLocaleString()}`,
                         inline: true,
                     },
                     {
-                        name: "Rarity",
-                        value: fishCaught.rarity.charAt(0).toUpperCase() + fishCaught.rarity.slice(1),
+                        name: "الندرة",
+                        value: rarityNamesArabic[fishCaught.rarity] || fishCaught.rarity,
                         inline: true,
                     }
                 )
-                .setFooter({ text: `Next fishing trip available in 45 minutes.` });
+                .setFooter({ text: `ستكون رحلة الصيد القادمة متاحة خلال 45 دقيقة.` });
 
             await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
     }, { command: 'fish' })
