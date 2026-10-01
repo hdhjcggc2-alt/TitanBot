@@ -8,8 +8,8 @@ export default {
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
-                .setTitle('Permission Denied')
-                .setDescription('You need **Manage Server** permissions to configure the birthday channel.');
+                .setTitle('تم رفض الصلاحية')
+                .setDescription('تحتاج إلى صلاحية **إدارة السيرفر** (Manage Server) لتكوين روم أعياد الميلاد.');
             return InteractionHelper.safeReply(interaction, {
                 embeds: [embed],
                 flags: MessageFlags.Ephemeral,
@@ -26,8 +26,8 @@ export default {
                 await setGuildConfig(client, guildId, guildConfig);
                 const embed = new EmbedBuilder()
                     .setColor(0x00FF00)
-                    .setTitle('Birthday Announcements Enabled')
-                    .setDescription(`Birthday announcements will now be posted in ${channel}.`);
+                    .setTitle('تم تفعيل إعلانات أعياد الميلاد')
+                    .setDescription(`سيتم الآن نشر إعلانات أعياد الميلاد في الروم ${channel}.`);
                 return InteractionHelper.safeReply(interaction, {
                     embeds: [embed],
                     flags: MessageFlags.Ephemeral,
@@ -37,8 +37,8 @@ export default {
                 await setGuildConfig(client, guildId, guildConfig);
                 const embed = new EmbedBuilder()
                     .setColor(0xFFFF00)
-                    .setTitle('Birthday Announcements Disabled')
-                    .setDescription('No channel provided — birthday announcements have been disabled.');
+                    .setTitle('تم تعطيل إعلانات أعياد الميلاد')
+                    .setDescription('لم يتم تحديد روم — وعليه تم تعطيل إعلانات أعياد الميلاد.');
                 return InteractionHelper.safeReply(interaction, {
                     embeds: [embed],
                     flags: MessageFlags.Ephemeral,
@@ -48,8 +48,8 @@ export default {
             logger.error('birthday_setchannel error:', error);
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
-                .setTitle('⚠️ Configuration Error')
-                .setDescription('Could not save the birthday channel configuration.');
+                .setTitle('⚠️ خطأ في الإعدادات')
+                .setDescription('تعذر حفظ إعدادات روم أعياد الميلاد.');
             return InteractionHelper.safeReply(interaction, {
                 embeds: [embed],
                 flags: MessageFlags.Ephemeral,
