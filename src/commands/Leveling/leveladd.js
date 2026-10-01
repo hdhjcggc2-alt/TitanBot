@@ -6,20 +6,21 @@ import { addLevels, getLevelingConfig } from '../../services/leveling/leveling.j
 import { createEmbed } from '../../utils/embeds.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
+
 export default {
   data: new SlashCommandBuilder()
     .setName('leveladd')
-    .setDescription('Add levels to a user')
+    .setDescription('إضافة مستويات لعضو ما')
     .addUserOption((option) =>
       option
         .setName('user')
-        .setDescription('The user to add levels to')
+        .setDescription('العضو المراد إضافة المستويات له')
         .setRequired(true)
     )
     .addIntegerOption((option) =>
       option
         .setName('levels')
-        .setDescription('Number of levels to add')
+        .setDescription('عدد المستويات المراد إضافتها')
         .setRequired(true)
         .setMinValue(1)
     )
@@ -33,7 +34,7 @@ export default {
     const hasPermission = await checkUserPermissions(
       interaction,
       PermissionFlagsBits.ManageGuild,
-      'You need ManageGuild permission to use this command.'
+      'تحتاج إلى صلاحية **إدارة السيرفر** (Manage Server) لاستخدام هذا الأمر.'
     );
     if (!hasPermission) return;
 
@@ -43,7 +44,7 @@ export default {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
-            .setDescription('The leveling system is currently disabled on this server.')
+            .setDescription('نظام المستويات معطل حالياً في هذا السيرفر.')
         ],
         flags: MessageFlags.Ephemeral
       });
@@ -58,7 +59,7 @@ export default {
       throw new TitanBotError(
         `User ${targetUser.id} not found in this guild`,
         ErrorTypes.USER_INPUT,
-        'The specified user is not in this server.'
+        'العضو المحدد غير متواجد في هذا السيرفر.'
       );
     }
 
@@ -67,8 +68,8 @@ export default {
     await InteractionHelper.safeEditReply(interaction, {
       embeds: [
         createEmbed({
-          title: 'Levels Added',
-          description: `Successfully added ${levelsToAdd} levels to ${targetUser.tag}.\n**New Level:** ${userData.level}`,
+          title: 'تم إضافة المستويات',
+          description: `تم إضافة **${levelsToAdd}** مستوى بنجاح إلى العضو ${targetUser.tag}.\n**المستوى الجديد:** ${userData.level}`,
           color: 'success'
         })
       ]
