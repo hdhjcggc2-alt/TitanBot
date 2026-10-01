@@ -17,47 +17,47 @@ import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('count')
-    .setDescription('Manage the server counting game')
+    .setDescription('إدارة لعبة العد في السيرفر')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .setDMPermission(false)
     .addSubcommand((subcommand) =>
       subcommand
         .setName('setup')
-        .setDescription('Start a counting game in a text channel')
+        .setDescription('بدء لعبة العد في قناة نصية')
         .addChannelOption((option) =>
           option
             .setName('channel')
-            .setDescription('The channel where counting will take place')
+            .setDescription('القناة التي سيتم العد فيها')
             .setRequired(true)
             .addChannelTypes(ChannelType.GuildText),
         )
         .addStringOption((option) =>
           option
             .setName('system')
-            .setDescription('The counting system to use')
+            .setDescription('نظام العد المراد استخدامه')
             .setRequired(true)
             .addChoices(...getCountingSystemChoices()),
         ),
     )
     .addSubcommand((subcommand) =>
-      subcommand.setName('disable').setDescription('Disable the counting game for this server'),
+      subcommand.setName('disable').setDescription('تعطيل لعبة العد لهذا السيرفر'),
     )
     .addSubcommand((subcommand) =>
-      subcommand.setName('status').setDescription('View current counting game status'),
+      subcommand.setName('status').setDescription('عرض حالة لعبة العد الحالية'),
     )
     .addSubcommand((subcommand) =>
       subcommand
         .setName('reset')
-        .setDescription('Reset the current counting sequence')
+        .setDescription('إعادة تعيين تسلسل العد الحالي')
         .addIntegerOption((option) =>
           option
             .setName('start')
-            .setDescription('The number to start at after reset')
+            .setDescription('الرقم الذي سيتم البدء به بعد إعادة التعيين')
             .setMinValue(1),
         ),
     )
     .addSubcommand((subcommand) =>
-      subcommand.setName('leaderboard').setDescription('Show the counting game leaderboard'),
+      subcommand.setName('leaderboard').setDescription('عرض لوحة المتصدرين في لعبة العد'),
     ),
   category: 'Fun',
 
@@ -70,7 +70,7 @@ export default {
       }
 
       if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-        return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need the **Manage Server** permission to use this command.' });
+        return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'تحتاج إلى صلاحية **إدارة السيرفر (Manage Server)** لاستخدام هذا الأمر.' });
       }
 
       const guildId = interaction.guildId;
@@ -81,19 +81,19 @@ export default {
         const channel = interaction.options.getChannel('channel');
         const system = interaction.options.getString('system');
         if (!channel || channel.type !== ChannelType.GuildText) {
-          return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please choose a text channel for the counting game.' });
+          return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'الرجاء اختيار قناة نصية للعبة العد.' });
         }
 
         if (config.enabled && config.channelId && config.channelId !== channel.id) {
-          return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `This server already has an active counting channel configured: <#${config.channelId}>. Disable the current counting game first, or use that existing channel.` });
+          return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `يحتوي هذا السيرفر بالفعل على قناة عد نشطة مُكوّنة: <#${config.channelId}>. قم بتعطيل لعبة العد الحالية أولاً، أو استخدم تلك القناة الموجودة.` });
         }
 
         await activateCountingGame(interaction.client, guildId, channel.id, system);
         return await InteractionHelper.safeEditReply(interaction, {
           embeds: [
             successEmbed(
-              'Counting Game Enabled',
-              `The counting game is now active in ${channel} using the **${getCountingSystemLabel(system)}** system. Players must count up from **1** and may not post two numbers in a row.`,
+              'تم تفعيل لعبة العد',
+              `لعبة العد مفعلة الآن في ${channel} باستخدام نظام **${getCountingSystemLabel(system)}**. يجب على اللاعبين العد التصاعدي بدءاً من **1** ولا يجوز إرسال رقمين متتاليين من نفس الشخص.`,
             ),
           ],
         });
@@ -102,32 +102,32 @@ export default {
       if (subcommand === 'disable') {
         if (!config.enabled) {
           return await InteractionHelper.safeEditReply(interaction, {
-            embeds: [infoEmbed('Counting Game Disabled', 'The counting game is already disabled for this server.')],
+            embeds: [infoEmbed('لعبة العد معطلة', 'لعبة العد معطلة بالفعل لهذا السيرفر.')],
           });
         }
 
         await disableCountingGame(interaction.client, guildId);
         return await InteractionHelper.safeEditReply(interaction, {
-          embeds: [successEmbed('Counting Game Disabled', 'The counting game has been disabled.')],
+          embeds: [successEmbed('لعبة العد معطلة', 'تم تعطيل لعبة العد بنجاح.')],
         });
       }
 
       if (subcommand === 'status') {
         const fields = [
-          { name: 'Enabled', value: config.enabled ? 'Yes' : 'No', inline: true },
-          { name: 'Channel', value: config.channelId ? `<#${config.channelId}>` : 'Not configured', inline: true },
-          { name: 'System', value: getCountingSystemLabel(config.system), inline: true },
-          { name: 'Next count', value: getExpectedCountValue(config), inline: true },
-          { name: 'Current streak', value: `${config.currentStreak}`, inline: true },
-          { name: 'Best streak', value: `${config.bestStreak || 0}`, inline: true },
-          { name: 'Last counter', value: config.lastUserId ? `<@${config.lastUserId}>` : 'None', inline: true },
+          { name: 'مفعلة', value: config.enabled ? 'نعم' : 'لا', inline: true },
+          { name: 'القناة', value: config.channelId ? `<#${config.channelId}>` : 'غير مُكوّنة', inline: true },
+          { name: 'النظام', value: getCountingSystemLabel(config.system), inline: true },
+          { name: 'العد القادم', value: getExpectedCountValue(config), inline: true },
+          { name: 'السلسلة الحالية', value: `${config.currentStreak}`, inline: true },
+          { name: 'أفضل سلسلة', value: `${config.bestStreak || 0}`, inline: true },
+          { name: 'آخر مشارك', value: config.lastUserId ? `<@${config.lastUserId}>` : 'لا يوجد', inline: true },
         ];
 
         return await InteractionHelper.safeEditReply(interaction, {
           embeds: [
             createEmbed({
-              title: 'Counting Game Status',
-              description: 'Overview of the currently configured counting game.',
+              title: 'حالة لعبة العد',
+              description: 'نظرة عامة على إعدادات لعبة العد الحالية.',
               fields,
               color: 'primary',
             }),
@@ -137,7 +137,7 @@ export default {
 
       if (subcommand === 'reset') {
         if (!config.enabled) {
-          return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Enable the counting game first with `/count setup`.' });
+          return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'قم بتفعيل لعبة العد أولاً باستخدام الأمر `/count setup`.' });
         }
 
         const startNumber = interaction.options.getInteger('start') || 1;
@@ -146,8 +146,8 @@ export default {
         return await InteractionHelper.safeEditReply(interaction, {
           embeds: [
             successEmbed(
-              'Counting Game Reset',
-              `The counting sequence has been reset. Start again with **${startNumber}** in <#${config.channelId}>.`,
+              'إعادة تعيين لعبة العد',
+              `تم إعادة تعيين تسلسل العد. ابدأ مرة أخرى بالرقم **${startNumber}** في القناة <#${config.channelId}>.`,
             ),
           ],
         });
@@ -159,18 +159,18 @@ export default {
         return await InteractionHelper.safeEditReply(interaction, {
           embeds: [
             createEmbed({
-              title: 'Counting Game Leaderboard',
-              description: leaderboard.length > 0 ? leaderboard.join('\n') : 'No counts have been recorded yet.',
+              title: 'لوحة متصدرين لعبة العد',
+              description: leaderboard.length > 0 ? leaderboard.join('\n') : 'لم يتم تسجيل أي أقام عد حتى الآن.',
               color: 'primary',
             }),
           ],
         });
       }
 
-      return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please choose a valid counting game action.' });
+      return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'الرجاء اختيار إجراء صحيح للعبة العد.' });
     } catch (error) {
       logger.error('Count command error:', error);
-      return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Something went wrong while managing the counting game.' });
+      return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'حدث خطأ ما أثناء إدارة لعبة العد.' });
     }
   },
 };
