@@ -4,28 +4,28 @@ import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 import { checkUserPermissions } from '../../utils/permissionGuard.js';
 import { setUserLevel, getLevelingConfig } from '../../services/leveling/leveling.js';
 import { createEmbed } from '../../utils/embeds.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
 
+import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('levelset')
-    .setDescription('تعيين مستوى محدد لمستخدم معين')
+    .setDescription("Set a user's level to a specific value")
     .addUserOption((option) =>
       option
         .setName('user')
-        .setDescription('المستخدم المراد تعديل مستواه')
+        .setDescription('The user to set the level for')
         .setRequired(true)
     )
     .addIntegerOption((option) =>
       option
         .setName('level')
-        .setDescription('المستوى الجديد المراد تعيينه')
+        .setDescription('The level to set')
         .setRequired(true)
         .setMinValue(0)
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .setDMPermission(false),
-  category: 'المستويات',
+  category: 'Leveling',
 
   async execute(interaction, config, client) {
     await InteractionHelper.safeDefer(interaction);
@@ -33,7 +33,7 @@ export default {
     const hasPermission = await checkUserPermissions(
       interaction,
       PermissionFlagsBits.ManageGuild,
-      'عذراً، تحتاج إلى صلاحية إدارة السيرفر (ManageGuild) لاستخدام هذا الأمر.'
+      'You need ManageGuild permission to use this command.'
     );
     if (!hasPermission) return;
 
@@ -43,7 +43,7 @@ export default {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
-            .setDescription('⚠️ نظام المستويات معطل حالياً في هذا السيرفر.')
+            .setDescription('The leveling system is currently disabled on this server.')
         ],
         flags: MessageFlags.Ephemeral
       });
@@ -58,7 +58,7 @@ export default {
       throw new TitanBotError(
         `User ${targetUser.id} not found in this guild`,
         ErrorTypes.USER_INPUT,
-        'المستخدم المحدد غير موجود في هذا السيرفر.'
+        'The specified user is not in this server.'
       );
     }
 
@@ -67,8 +67,8 @@ export default {
     await InteractionHelper.safeEditReply(interaction, {
       embeds: [
         createEmbed({
-          title: 'تم تحديث المستوى',
-          description: `تم بنجاح تعيين مستوى المستخدم ${targetUser.tag} إلى **${newLevel}**.\n**إجمالي نقاط الخبرة (XP):** ${userData.totalXp}`,
+          title: 'Level Set',
+          description: `Successfully set ${targetUser.tag}'s level to **${newLevel}**.\n**Total XP:** ${userData.totalXp}`,
           color: 'success'
         })
       ]
