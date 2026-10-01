@@ -3,6 +3,7 @@ import { getUserBirthday } from '../../../services/birthdayService.js';
 import { logger } from '../../../utils/logger.js';
 
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
+
 export default {
     async execute(interaction, config, client) {
         await InteractionHelper.safeDefer(interaction);
@@ -16,10 +17,10 @@ export default {
         if (!birthdayData) {
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
-                .setTitle('No Birthday Found')
+                .setTitle('لم يتم العثور على عيد ميلاد')
                 .setDescription(targetUser.id === interaction.user.id 
-                    ? "You haven't set your birthday yet. Use `/birthday set` to add it!"
-                    : `${targetUser.username} hasn't set their birthday yet.`);
+                    ? "لم تقم بتحديد عيد ميلادك بعد. استخدم الأمر `/birthday set` لإضافته!"
+                    : `لم يقم العضو ${targetUser.username} بتحديد عيد ميلاده بعد.`);
             return await InteractionHelper.safeEditReply(interaction, {
                 embeds: [embed]
             });
@@ -27,8 +28,8 @@ export default {
 
         const embed = new EmbedBuilder()
             .setColor(0x00FF00)
-            .setTitle('Birthday Information')
-            .setDescription(`**Date:** ${birthdayData.monthName} ${birthdayData.day}\n**User:** ${targetUser.toString()}`);
+            .setTitle('معلومات عيد الميلاد')
+            .setDescription(`**التاريخ:** ${birthdayData.day} ${birthdayData.monthName}\n**العضو:** ${targetUser.toString()}`);
 
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [embed]
