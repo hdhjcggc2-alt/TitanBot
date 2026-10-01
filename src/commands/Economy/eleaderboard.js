@@ -8,7 +8,7 @@ import { getEconomyPrefix } from '../../utils/database.js';
 export default {
     data: new SlashCommandBuilder()
         .setName("eleaderboard")
-        .setDescription("View the server's top 10 richest users.")
+        .setDescription("عرض قائمة أغنى 10 مستخدمين في السيرفر")
         .setDMPermission(false),
 
     execute: withErrorHandling(async (interaction, config, client) => {
@@ -31,7 +31,7 @@ export default {
                 throw createError(
                     "No economy data found",
                     ErrorTypes.VALIDATION,
-                    "No economy data found for this server."
+                    "لا توجد أي بيانات اقتصادية مسجلة لهذا السيرفر بعد."
                 );
             }
 
@@ -64,7 +64,7 @@ export default {
                 const emoji = rankEmoji[i] || `**#${rank}**`;
 
                 leaderboardEntries.push(
-                    `${emoji} <@${user.userId}> - 🏦 ${user.net_worth.toLocaleString()}`,
+                    `${emoji} <@${user.userId}> - 🏦 $${user.net_worth.toLocaleString()}`,
                 );
             }
 
@@ -76,12 +76,12 @@ export default {
 
             const description = leaderboardEntries.length > 0
                 ? leaderboardEntries.join("\n")
-                : "No economy data is available for this server yet.";
+                : "لا توجد بيانات اقتصادية متاحة لهذا السيرفر حتى الآن.";
 
             const embed = createEmbed({
-                title: `Economy Leaderboard`,
+                title: `🏆 لوحة متصدرين الاقتصاد`,
                 description,
-                footer: `Your Rank: ${userRank > 0 ?`#${userRank}`: "No ranking data available"}`,
+                footer: `ترتيبك: ${userRank > 0 ? `#${userRank}` : "لا توجد بيانات ترتيب متاحة"}`,
             });
 
             await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
