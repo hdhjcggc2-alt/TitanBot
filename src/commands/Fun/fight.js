@@ -9,11 +9,11 @@ const EMBED_DESCRIPTION_LIMIT = 4096;
 export default {
     data: new SlashCommandBuilder()
     .setName("fight")
-    .setDescription("Starts a simulated 1v1 text-based battle.")
+    .setDescription("بدء معركة نصية وهمية بنظام 1 ضد 1.")
     .addUserOption((option) =>
       option
         .setName("opponent")
-        .setDescription("The user to fight.")
+        .setDescription("المستخدم المراد قتاله.")
         .setRequired(true),
     ),
   category: 'Fun',
@@ -26,16 +26,16 @@ export default {
 
     if (challenger.id === opponent.id) {
       const embed = warningEmbed(
-        "⚔️ Invalid Challenge",
-        `**${challenger.username}**, you can't fight yourself! That's a draw before it even starts.`
+        "⚔️ تحدٍ غير صالح",
+        `**${challenger.username}**، لا يمكنك قتال نفسك! هذا تعادل قبل أن يبدأ النزال حتى.`
       );
       return await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
     }
 
     if (opponent.bot) {
       const embed = warningEmbed(
-        "⚔️ Invalid Opponent",
-        "You can't fight bots! Challenge a real person instead."
+        "⚔️ خصم غير صالح",
+        "لا يمكنك قتال البوتات! تحد شخصاً حقيقياً بدلاً من ذلك."
       );
       return await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
     }
@@ -47,25 +47,25 @@ export default {
 
     const log = [];
     log.push(
-      `💥 **${challenger.username}** challenges **${opponent.username}** to a duel! (Best of ${rounds} rounds)`,
+      `💥 يتحدى **${challenger.username}** اللاعب **${opponent.username}** في نزال! (أفضل من ${rounds} جولات)`,
     );
 
     for (let i = 1; i <= rounds; i++) {
       const attacker = rand(0, 1) === 0 ? challenger : opponent;
       const target = attacker.id === challenger.id ? opponent : challenger;
       const action = [
-        "throws a wild punch",
-        "lands a critical hit",
-        "uses a weak spell",
-        "parries and counterattacks",
+        "يوجه لكمة عشوائية",
+        "يسدد ضربة حرجة",
+        "يستخدم تعويذة ضعيفة",
+        "يتصدى للهجوم ويهجم بالمقابل",
       ][rand(0, 3)];
       log.push(
-        `\n**Round ${i}:** ${attacker.username} ${action} on ${target.username} for ${rand(1, damage)} damage!`,
+        `\n**الجولة ${i}:** ${attacker.username} ${action} على ${target.username} متسبباً في ضرر بمقدار ${rand(1, damage)}!`,
       );
     }
 
     const outcomeText = log.join("\n");
-    const winnerText = `👑 **${winner.username}** has defeated ${loser.username} and claims the victory!`;
+    const winnerText = `👑 لقد هزم **${winner.username}** اللاعب ${loser.username} وحقق الانتصار!`;
     const fullDescription = `${outcomeText}\n\n${winnerText}`;
 
     const description = fullDescription.length <= EMBED_DESCRIPTION_LIMIT
@@ -73,7 +73,7 @@ export default {
       : `${fullDescription.slice(0, EMBED_DESCRIPTION_LIMIT - 15)}\n\n...`;
 
     const embed = successEmbed(
-      "🏆 Duel Complete!",
+      "🏆 انتهى النزال!",
       description
     );
 
