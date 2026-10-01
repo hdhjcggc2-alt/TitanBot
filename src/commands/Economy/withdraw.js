@@ -7,11 +7,11 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('withdraw')
-        .setDescription('Withdraw money from your bank to your wallet')
+        .setDescription('سحب الأموال من البنك إلى محفظتك')
         .addIntegerOption(option =>
             option
                 .setName('amount')
-                .setDescription('Amount to withdraw')
+                .setDescription('المبلغ المراد سحبه')
                 .setRequired(true)
                 .setMinValue(1)
         ),
@@ -29,7 +29,7 @@ export default {
                 throw createError(
                     "Failed to load economy data",
                     ErrorTypes.DATABASE,
-                    "Failed to load your economy data. Please try again later.",
+                    "فشل تحميل بيانات الاقتصاد الخاصة بك. يرجى المحاولة مرة أخرى لاحقاً.",
                     { userId, guildId }
                 );
             }
@@ -40,7 +40,7 @@ export default {
                 throw createError(
                     "Invalid withdrawal amount",
                     ErrorTypes.VALIDATION,
-                    "You must withdraw a positive amount.",
+                    "يجب أن تقوم بسحب مبلغ موجِب.",
                     { amount: withdrawAmount, userId }
                 );
             }
@@ -53,7 +53,7 @@ export default {
                 throw createError(
                     "Empty bank account",
                     ErrorTypes.VALIDATION,
-                    "Your bank account is empty.",
+                    "حسابك البنكي فارغ.",
                     { userId, bankBalance: userData.bank }
                 );
             }
@@ -64,17 +64,17 @@ export default {
             await setEconomyData(client, guildId, userId, userData);
 
             const embed = successEmbed(
-                'Withdrawal Successful',
-                `You successfully withdrew **$${withdrawAmount.toLocaleString()}** from your bank.`
+                'تم السحب بنجاح',
+                `لقد قمت بسحب **$${withdrawAmount.toLocaleString()}** من بنكك بنجاح.`
             )
                 .addFields(
                     {
-                        name: "New Cash Balance",
+                        name: "رصيد المحفظة الجديد",
                         value: `$${userData.wallet.toLocaleString()}`,
                         inline: true,
                     },
                     {
-                        name: "New Bank Balance",
+                        name: "رصيد البنك الجديد",
                         value: `$${userData.bank.toLocaleString()}`,
                         inline: true,
                     },
