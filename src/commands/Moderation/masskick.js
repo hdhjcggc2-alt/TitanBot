@@ -6,23 +6,24 @@ import { ModerationService } from '../../services/moderation/moderationService.j
 import { TitanBotError, replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
+
 export default {
     data: new SlashCommandBuilder()
         .setName("masskick")
-        .setDescription("Kick multiple users from the server at once")
+        .setDescription("طرد عدة مستخدمين من السيرفر دفعة واحدة")
         .addStringOption(option =>
             option
                 .setName("users")
-                .setDescription("User IDs or mentions to kick (separated by spaces or commas)")
+                .setDescription("معرفات أو منشن المستخدمين المراد طردهم (مفصولة بمسافات أو فواصل)")
                 .setRequired(true)
         )
         .addStringOption(option =>
             option.setName("reason")
-                .setDescription("Reason for the mass kick")
+                .setDescription("سبب الطرد الجماعي")
                 .setRequired(false)
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
-    category: "moderation",
+    category: "الإشراف",
     abuseProtection: { maxAttempts: 3, windowMs: 60_000 },
 
     async execute(interaction, config, client) {
@@ -37,25 +38,25 @@ export default {
         }
 
         const usersInput = interaction.options.getString("users");
-        const reason = interaction.options.getString("reason") || "Mass kick - No reason provided";
+        const reason = interaction.options.getString("reason") || "طرد جماعي - لم يتم تقديم سبب";
 
         try {
             const userIds = usersInput
-.replace(/<@!?(\d+)>/g, '$1')
-.split(/[\s,]+/)
-.filter(id => id && /^\d+$/.test(id))
-.slice(0, 20);
+                .replace(/<@!?(\d+)>/g, '$1')
+                .split(/[\s,]+/)
+                .filter(id => id && /^\d+$/.test(id))
+                .slice(0, 20);
 
             if (userIds.length === 0) {
-                return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'Please provide valid user IDs or mentions. Maximum 20 users at once.' });
+                return await replyUserError(interaction, { type: ErrorTypes.VALIDATION, message: 'الرجاء توفير معرفات مستخدمين أو منشن صحيح. بحد أقصى 20 مستخدماً في المرة الواحدة.' });
             }
 
             if (userIds.includes(interaction.user.id)) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You cannot include yourself in a mass kick.' });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'لا يمكنك تضمين نفسك في عملية الطرد الجماعي.' });
             }
 
             if (userIds.includes(client.user.id)) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You cannot include the bot in a mass kick.' });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'لا يمكنك تضمين البوت في عملية الطرد الجماعي.' });
             }
 
             const results = {
@@ -69,7 +70,7 @@ export default {
                     const member = await interaction.guild.members.fetch(userId).catch(() => null);
                     
                     if (!member) {
-                        results.failed.push({ userId, reason: "User not in server" });
+                        results.failed.push({ userId, reason: "المستخدم غير موجود في السيرفر" });
                         continue;
                     }
 
@@ -97,7 +98,7 @@ export default {
                         results.skipped.push({
                             user: member.user.tag,
                             userId,
-                            reason: 'Target has Admin or a managed role, or bot lacks Kick Members',
+                            reason: 'الهدف يمتلك صلاحيات إدارية أو رتبة محمية، أو أن البوت يفتقر لصلاحية طرد الأعضاء',
                         });
                         continue;
                     }
@@ -113,10 +114,10 @@ export default {
                         client,
                         guild: interaction.guild,
                         event: {
-                            action: "Member Kicked",
+                            action: "طرد عضواً",
                             target: `${member.user.tag} (${member.user.id})`,
                             executor: `${interaction.user.tag} (${interaction.user.id})`,
-                            reason: `${reason} (Mass Kick)`,
+                            reason: `${reason} (طرد جماعي)`,
                             metadata: {
                                 userId: member.user.id,
                                 moderatorId: interaction.user.id,
@@ -127,20 +128,20 @@ export default {
 
                 } catch (error) {
                     logger.error(`Failed to kick user ${userId}:`, error);
-                    const reason = error instanceof TitanBotError
+                    const errorReason = error instanceof TitanBotError
                         ? (error.userMessage || error.message)
-                        : (error.message || "Unknown error");
+                        : (error.message || "خطأ غير معروف");
                     results.failed.push({ 
                         userId, 
-                        reason,
+                        reason: errorReason,
                     });
                 }
             }
 
-            let description = `**Mass Kick Results:**\n\n`;
+            let description = `**نتائج الطرد الجماعي:**\n\n`;
             
             if (results.successful.length > 0) {
-                description += `✅ **Successfully Kicked (${results.successful.length}):**\n`;
+                description += `✅ **تم الطرد بنجاح (${results.successful.length}):**\n`;
                 results.successful.forEach(result => {
                     description += `• ${result.user} (${result.userId})\n`;
                 });
@@ -148,7 +149,7 @@ export default {
             }
 
             if (results.skipped.length > 0) {
-                description += `⚠️ **Skipped (${results.skipped.length}):**\n`;
+                description += `⚠️ **تم التخطي (${results.skipped.length}):**\n`;
                 results.skipped.forEach(result => {
                     description += `• ${result.user} - ${result.reason}\n`;
                 });
@@ -156,7 +157,7 @@ export default {
             }
 
             if (results.failed.length > 0) {
-                description += `❌ **Failed (${results.failed.length}):**\n`;
+                description += `❌ **فشل (${results.failed.length}):**\n`;
                 results.failed.forEach(result => {
                     description += `• ${result.userId} - ${result.reason}\n`;
                 });
@@ -167,7 +168,7 @@ export default {
             return await InteractionHelper.safeEditReply(interaction, {
                 embeds: [
                     embed(
-                        `👢 Mass Kick Completed`,
+                        `👢 اكتمل الطرد الجماعي`,
                         description
                     )
                 ]
@@ -175,7 +176,7 @@ export default {
 
         } catch (error) {
             logger.error("Error in masskick command:", error);
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while processing the mass kick. Please try again later.' });
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'حدث خطأ أثناء معالجة الطرد الجماعي. الرجاء المحاولة مرة أخرى لاحقاً.' });
         }
     }
 };
