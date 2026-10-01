@@ -6,31 +6,32 @@ import { sanitizeMarkdown } from '../../utils/validation.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+
 export default {
     data: new SlashCommandBuilder()
         .setName("dm")
-        .setDescription("Send a direct message to a user (Staff only)")
+        .setDescription("إرسال رسالة خاصة (خاص) إلى مستخدم (للإدارة فقط)")
         .addUserOption(option =>
             option
                 .setName("user")
-                .setDescription("The user to send a DM to")
+                .setDescription("المستخدم المراد إرسال الرسالة إليه")
                 .setRequired(true)
         )
         .addStringOption(option =>
             option
                 .setName("message")
-                .setDescription("The message to send")
+                .setDescription("الرسالة المراد إرسالها")
                 .setRequired(true)
         )
         .addBooleanOption(option =>
             option
                 .setName("anonymous")
-                .setDescription("Send the message anonymously (default: false)")
+                .setDescription("إرسال الرسالة بشكل مجهول/بدون ذكر اسم الإداري (افتراضي: لا)")
                 .setRequired(false)
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
         .setDMPermission(false),
-    category: "moderation",
+    category: "الإشراف",
 
     async execute(interaction, config, client) {
         const deferSuccess = await InteractionHelper.safeDefer(interaction);
@@ -43,18 +44,17 @@ export default {
             return;
         }
 
-    const targetUser = interaction.options.getUser("user");
+        const targetUser = interaction.options.getUser("user");
         const message = interaction.options.getString("message");
         const anonymous = interaction.options.getBoolean("anonymous") || false;
 
         try {
-            
             if (message.length > 2000) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Messages must be under 2000 characters.' });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'يجب أن تكون الرسائل أقل من 2000 حرف.' });
             }
 
             if (targetUser.bot) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'You cannot send DMs to bot accounts.' });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'لا يمكنك إرسال رسائل خاصة لحسابات البوتات.' });
             }
 
             const sanitized = sanitizeMarkdown(message);
@@ -64,10 +64,10 @@ export default {
             await dmChannel.send({
                 embeds: [
                     successEmbed(
-                        anonymous ? "Message from the Staff Team" : `Message from ${interaction.user.tag}`,
+                        anonymous ? "رسالة من فريق الإدارة" : `رسالة من ${interaction.user.tag}`,
                         sanitized
                     ).setFooter({
-                        text: `You cannot reply to this message. | Logger ID: ${interaction.id}`
+                        text: `لا يمكنك الرد على هذه الرسالة. | معرف السجل: ${interaction.id}`
                     })
                 ]
             });
@@ -76,10 +76,10 @@ export default {
                 client: interaction.client,
                 guild: interaction.guild,
                 event: {
-                    action: "DM Sent",
+                    action: "إرسال رسالة خاصة (DM)",
                     target: `${targetUser.tag} (${targetUser.id})`,
                     executor: `${interaction.user.tag} (${interaction.user.id})`,
-                    reason: `Anonymous: ${anonymous ? 'Yes' : 'No'}`,
+                    reason: `بشكل مجهول: ${anonymous ? 'نعم' : 'لا'}`,
                     metadata: {
                         userId: targetUser.id,
                         moderatorId: interaction.user.id,
@@ -92,19 +92,19 @@ export default {
             return await InteractionHelper.safeEditReply(interaction, {
                 embeds: [
                     successEmbed(
-                        "DM Sent",
-                        `Successfully sent a message to ${targetUser.tag}`
+                        "تم إرسال الرسالة الخاصة",
+                        `تم بنجاح إرسال رسالة إلى ${targetUser.tag}`
                     ),
                 ],
             });
         } catch (error) {
             logger.error('DM command error:', error);
             
-if (error.code === 50007) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Could not send a DM to ${targetUser.tag}. They may have DMs disabled.` });
+            if (error.code === 50007) {
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `تعذر إرسال رسالة خاصة إلى ${targetUser.tag}. قد تكون رسائله الخاصة مغلقة (معطلة).` });
             }
             
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `Failed to send DM: ${error.message}` });
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `فشل إرسال الرسالة الخاصة: ${error.message}` });
         }
     }
 };
