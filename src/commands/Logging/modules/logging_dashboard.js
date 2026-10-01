@@ -24,9 +24,9 @@ export function getCategoryStatus(enabledEvents, category, auditEnabled) {
 }
 
 async function formatChannelMention(guild, id) {
-  if (!id) return '`Not configured`';
+  if (!id) return '`غير مكوّن`';
   const channel = guild.channels.cache.get(id) ?? await guild.channels.fetch(id).catch(() => null);
-  return channel ? channel.toString() : `⚠️ Missing (${id})`;
+  return channel ? channel.toString() : `⚠️ مفقود (${id})`;
 }
 
 function countEnabledCategories(enabledEvents, auditEnabled) {
@@ -53,44 +53,44 @@ export async function buildLoggingDashboardView(interaction, client) {
   const { enabled: enabledCount, total } = countEnabledCategories(loggingStatus.enabledEvents, auditEnabled);
 
   const embed = new EmbedBuilder()
-    .setTitle('📝 Logging Dashboard')
-    .setDescription(`Manage server logging for **${interaction.guild.name}**. Use the menu below to configure channels, categories, and filters.`)
+    .setTitle('📝 لوحة تحكم السجلات (Logging Dashboard)')
+    .setDescription(`إدارة سجلات السيرفر لـ **${interaction.guild.name}**. استخدم القائمة أدناه لتكوين الرومات، الفئات، والتصفية.`)
     .setColor(auditEnabled ? getColor('success') : getColor('warning'))
     .addFields(
       {
-        name: 'Logging Status',
-        value: auditEnabled ? '✅ Enabled' : '❌ Disabled',
+        name: 'حالة السجلات',
+        value: auditEnabled ? '✅ مفعلة' : '❌ معطلة',
         inline: true,
       },
       {
-        name: 'Event Categories',
-        value: auditEnabled ? `${enabledCount}/${total} enabled` : '`Logging disabled`',
+        name: 'فئات الأحداث',
+        value: auditEnabled ? `${enabledCount}/${total} مفعلة` : '`السجلات معطلة`',
         inline: true,
       },
       {
-        name: 'Ignore Filters',
-        value: `${ignore.users?.length || 0} users · ${ignore.channels?.length || 0} channels`,
+        name: 'فلاتر التجاهل',
+        value: `${ignore.users?.length \vert{}\vert{} 0} أعضاء · ${ignore.channels?.length || 0} رومات`,
         inline: true,
       },
       {
-        name: 'Log Channels',
+        name: 'رومات السجلات',
         value: [
-          `**Audit:** ${auditChannel}`,
-          `**Applications:** ${applicationsChannel}`,
-          `**Reports:** ${reportsChannel}`,
+          `**التدقيف (Audit):** ${auditChannel}`,
+          `**التقديمات (Applications):** ${applicationsChannel}`,
+          `**البلاغات (Reports):** ${reportsChannel}`,
         ].join('\n'),
         inline: false,
       },
       {
-        name: 'Ticket Channels (read-only)',
+        name: 'رومات التذاكر (للقراءة فقط)',
         value: [
-          `**Ticket Logs:** ${lifecycleChannel}`,
-          `**Transcripts:** ${transcriptChannel}`,
+          `**سجلات التذاكر:** ${lifecycleChannel}`,
+          `**النصوص المحفوظة (Transcripts):** ${transcriptChannel}`,
         ].join('\n'),
         inline: false,
       },
     )
-    .setFooter({ text: 'Ticket channels: configure via /ticket dashboard' })
+    .setFooter({ text: 'رومات التذاكر: قم بتكوينها عبر /ticket dashboard' })
     .setTimestamp();
 
   const components = createLoggingDashboardComponents(loggingStatus.enabledEvents, auditEnabled);
@@ -108,15 +108,15 @@ export async function buildLoggingCategoriesView(interaction, client) {
   }).join('\n');
 
   const embed = new EmbedBuilder()
-    .setTitle('📋 Event Categories')
+    .setTitle('📋 فئات الأحداث (Event Categories)')
     .setDescription(
       auditEnabled
-        ? 'Toggle which types of events are logged to your audit channel.'
-        : '⚠️ Logging is disabled. Enable it from the main dashboard to send logs.',
+        ? 'قم بتبديل وتحديد أنواع الأحداث التي سيتم تسجيلها في روم التدقيق.'
+        : '⚠️ السجلات معطلة. قم بتفعيلها من لوحة التحكم الرئيسية لإرسال السجلات.',
     )
     .setColor(getColor('info'))
-    .addFields({ name: 'Category Status', value: categoryLines, inline: false })
-    .setFooter({ text: 'Green = logging on · Red = logging off' })
+    .addFields({ name: 'حالة الفئات', value: categoryLines, inline: false })
+    .setFooter({ text: 'أخضر = التسجيل مفعل · أحمر = التسجيل معطل' })
     .setTimestamp();
 
   const components = createLoggingCategoryViewComponents(loggingStatus.enabledEvents, auditEnabled);
@@ -128,22 +128,22 @@ export async function buildLoggingFilterView(interaction, client) {
   const ignore = loggingStatus.ignore || { users: [], channels: [] };
 
   const userLines = (ignore.users || []).length
-    ? ignore.users.map((id) => `• User \`${id}\``).join('\n')
-    : '*No ignored users*';
+    ? ignore.users.map((id) => `• عضو \`${id}\``).join('\n')
+    : '*لا يوجد أعضاء متجاهلون*';
 
   const channelLines = (ignore.channels || []).length
-    ? ignore.channels.map((id) => `• Channel \`${id}\``).join('\n')
-    : '*No ignored channels*';
+    ? ignore.channels.map((id) => `• روم \`${id}\``).join('\n')
+    : '*لا توجد رومات متجاهلة*';
 
   const embed = new EmbedBuilder()
-    .setTitle('🔇 Log Ignore Filters')
-    .setDescription('Users and channels on this list will be skipped when sending audit logs.')
+    .setTitle('🔇 فلاتر تجاهل السجلات (Log Ignore Filters)')
+    .setDescription('سيتم تخطي الأعضاء والرومات الموجودة في هذه القائمة عند إرسال سجلات التدقيق.')
     .setColor(getColor('info'))
     .addFields(
-      { name: 'Ignored Users', value: userLines.slice(0, 1024), inline: false },
-      { name: 'Ignored Channels', value: channelLines.slice(0, 1024), inline: false },
+      { name: 'الأعضاء المتجاهلون', value: userLines.slice(0, 1024), inline: false },
+      { name: 'الرومات المتجاهلة', value: channelLines.slice(0, 1024), inline: false },
     )
-    .setFooter({ text: 'Use the buttons below to add or remove filters' })
+    .setFooter({ text: 'استخدم الأزرار أدناه لإضافة أو إزالة الفلاتر' })
     .setTimestamp();
 
   const components = createLoggingFilterComponents();
@@ -151,11 +151,11 @@ export async function buildLoggingFilterView(interaction, client) {
 }
 
 export function isCategoriesView(interaction) {
-  return interaction.message?.embeds?.[0]?.title === '📋 Event Categories';
+  return interaction.message?.embeds?.[0]?.title?.includes('فئات الأحداث') || interaction.message?.embeds?.[0]?.title === '📋 Event Categories';
 }
 
 export function isFilterView(interaction) {
-  return interaction.message?.embeds?.[0]?.title === '🔇 Log Ignore Filters';
+  return interaction.message?.embeds?.[0]?.title?.includes('فلاتر تجاهل السجلات') || interaction.message?.embeds?.[0]?.title === '🔇 Log Ignore Filters';
 }
 
 export async function refreshDashboardMessage(interaction, client) {
@@ -180,7 +180,7 @@ export default {
   async execute(interaction, config, client) {
     try {
       if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
-        return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'You need **Manage Server** permissions to view the logging dashboard.' });
+        return await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'تحتاج إلى صلاحية **إدارة السيرفر** (Manage Server) لعرض لوحة تحكم السجلات.' });
       }
 
       await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
@@ -188,7 +188,7 @@ export default {
       await InteractionHelper.safeEditReply(interaction, { embeds: [embed], components });
     } catch (error) {
       logger.error('logging_dashboard error:', error);
-      await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'Failed to load the logging dashboard.' });
+      await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'فشل في تحميل لوحة تحكم السجلات.' });
     }
   },
 };
