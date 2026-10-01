@@ -19,88 +19,88 @@ import {
 import { deferMusicCommand } from '../../services/music/prefixSupport.js';
 
 export default {
-    category: 'الموسيقى',
+    category: 'Music',
     data: new SlashCommandBuilder()
         .setName('music')
-        .setDescription('إدارة التشغيل، قائمة الانتظار، وإعدادات الجلسة الصوتية')
+        .setDescription('Manage playback, queue, and voice session settings')
         .addSubcommand((sub) =>
-            sub.setName('pause').setDescription('إيقاف التشغيل مؤقتاً'),
+            sub.setName('pause').setDescription('Pause playback'),
         )
         .addSubcommand((sub) =>
-            sub.setName('resume').setDescription('استئناف التشغيل'),
+            sub.setName('resume').setDescription('Resume playback'),
         )
         .addSubcommand((sub) =>
-            sub.setName('skip').setDescription('تخطي المقطع الحالي'),
+            sub.setName('skip').setDescription('Skip the current track'),
         )
         .addSubcommand((sub) =>
-            sub.setName('stop').setDescription('إيقاف التشغيل ومسح قائمة الانتظار'),
+            sub.setName('stop').setDescription('Stop playback and clear the queue'),
         )
         .addSubcommand((sub) =>
-            sub.setName('shuffle').setDescription('إعادة ترتيب قائمة الانتظار عشوائياً'),
+            sub.setName('shuffle').setDescription('Shuffle the queue'),
         )
         .addSubcommand((sub) =>
             sub
                 .setName('loop')
-                .setDescription('تحديد وضع التكرار')
+                .setDescription('Set loop mode')
                 .addStringOption((opt) =>
                     opt
                         .setName('mode')
-                        .setDescription('وضع التكرار')
+                        .setDescription('Loop mode')
                         .setRequired(true)
                         .addChoices(
-                            { name: 'إيقاف (Off)', value: 'none' },
-                            { name: 'المقطع الحالي (Track)', value: 'track' },
-                            { name: 'قائمة الانتظار (Queue)', value: 'queue' },
+                            { name: 'Off', value: 'none' },
+                            { name: 'Track', value: 'track' },
+                            { name: 'Queue', value: 'queue' },
                         ),
                 ),
         )
         .addSubcommand((sub) =>
             sub
                 .setName('volume')
-                .setDescription('ضبط مستوى الصوت')
+                .setDescription('Set playback volume')
                 .addIntegerOption((opt) =>
-                    opt.setName('level').setDescription('مستوى الصوت (0-100)').setRequired(true).setMinValue(0).setMaxValue(100),
+                    opt.setName('level').setDescription('Volume (0-100)').setRequired(true).setMinValue(0).setMaxValue(100),
                 ),
         )
         .addSubcommand((sub) =>
             sub
                 .setName('seek')
-                .setDescription('الانتقال إلى ثانية محددة في المقطع الحالي')
+                .setDescription('Seek to a position in the current track')
                 .addIntegerOption((opt) =>
-                    opt.setName('seconds').setDescription('الموقع بالثواني').setRequired(true).setMinValue(0),
+                    opt.setName('seconds').setDescription('Position in seconds').setRequired(true).setMinValue(0),
                 ),
         )
         .addSubcommand((sub) =>
             sub
                 .setName('remove')
-                .setDescription('إزالة مقطع من قائمة الانتظار')
+                .setDescription('Remove a track from the queue')
                 .addIntegerOption((opt) =>
-                    opt.setName('position').setDescription('موقع المقطع في القائمة').setRequired(true).setMinValue(1),
+                    opt.setName('position').setDescription('Queue position').setRequired(true).setMinValue(1),
                 ),
         )
         .addSubcommand((sub) =>
             sub
                 .setName('move')
-                .setDescription('نقل مقطع داخل قائمة الانتظار')
+                .setDescription('Move a track in the queue')
                 .addIntegerOption((opt) =>
-                    opt.setName('from').setDescription('الموقع الحالي').setRequired(true).setMinValue(1),
+                    opt.setName('from').setDescription('Current position').setRequired(true).setMinValue(1),
                 )
                 .addIntegerOption((opt) =>
-                    opt.setName('to').setDescription('الموقع الجديد').setRequired(true).setMinValue(1),
+                    opt.setName('to').setDescription('New position').setRequired(true).setMinValue(1),
                 ),
         )
         .addSubcommand((sub) =>
-            sub.setName('clear').setDescription('مسح قائمة الانتظار بالكامل'),
+            sub.setName('clear').setDescription('Clear the queue'),
         )
         .addSubcommand((sub) =>
-            sub.setName('leave').setDescription('فصل البوت من القناة الصوتية'),
+            sub.setName('leave').setDescription('Disconnect the bot from the voice channel'),
         )
         .addSubcommand((sub) =>
             sub
                 .setName('247')
-                .setDescription('تفعيل أو إيقاف وضع 24/7 (البقاء في القناة الصوتية عند الخمول)')
+                .setDescription('Toggle 24/7 mode (stay in voice channel when idle)')
                 .addBooleanOption((opt) =>
-                    opt.setName('enabled').setDescription('تفعيل أو تعطيل وضع 24/7').setRequired(true),
+                    opt.setName('enabled').setDescription('Enable or disable 24/7 mode').setRequired(true),
                 ),
         ),
 
@@ -181,7 +181,7 @@ export default {
             }
             default:
                 await InteractionHelper.safeEditReply(interaction, {
-                    content: 'أمر فرعي غير معروف لخدمة الموسيقى.',
+                    content: 'Unknown music subcommand.',
                 });
         }
     },
