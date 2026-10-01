@@ -2,6 +2,7 @@ import { EmbedBuilder } from 'discord.js';
 import { deleteBirthday } from '../../../services/birthdayService.js';
 
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
+
 export default {
     async execute(interaction, config, client) {
         await InteractionHelper.safeDefer(interaction);
@@ -14,8 +15,8 @@ export default {
         if (result.status === 'not_found') {
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
-                .setTitle('No Birthday Found')
-                .setDescription('You don\'t have a birthday set to remove.');
+                .setTitle('لم يتم العثور على عيد ميلاد')
+                .setDescription('ليس لديك تاريخ ميلاد مسجل حتى تقم بحذفه.');
             await InteractionHelper.safeEditReply(interaction, {
                 embeds: [embed]
             });
@@ -24,8 +25,8 @@ export default {
 
         const embed = new EmbedBuilder()
             .setColor(0x00FF00)
-            .setTitle('Birthday Removed')
-            .setDescription('Your birthday has been successfully removed from the server.');
+            .setTitle('تم حذف عيد الميلاد')
+            .setDescription('تم إزالة تاريخ ميلادك بنجاح من سجلات السيرفر.');
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [embed]
         });
