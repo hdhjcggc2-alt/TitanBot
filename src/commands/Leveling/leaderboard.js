@@ -4,10 +4,11 @@ import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 import { getLeaderboard, getLevelingConfig, getXpForLevel } from '../../services/leveling/leveling.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
+
 export default {
   data: new SlashCommandBuilder()
     .setName('leaderboard')
-    .setDescription("Shows the server's level leaderboard")
+    .setDescription('عرض قائمة متصدري المستويات في السيرفر')
     .setDMPermission(false),
   category: 'Leveling',
 
@@ -21,7 +22,7 @@ export default {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
-            .setDescription('The leveling system is currently disabled on this server.')
+            .setDescription('نظام المستويات معطل حالياً في هذا السيرفر.')
         ],
         flags: MessageFlags.Ephemeral
       });
@@ -34,14 +35,14 @@ export default {
       throw new TitanBotError(
         'No leaderboard data found',
         ErrorTypes.DATABASE,
-        'No level data found yet. Start chatting to gain XP!'
+        'لا توجد بيانات مستويات مسجلة بعد. ابدأ بالدردشة لكسب نقاط الخبرة (XP)!'
       );
     }
 
     const embed = new EmbedBuilder()
-      .setTitle('Level Leaderboard')
+      .setTitle('قائمة متصدري المستويات')
       .setColor('#2ecc71')
-      .setDescription("Top 10 most active members in this server:")
+      .setDescription('أكثر 10 أعضاء نشاطاً في هذا السيرفر:')
       .setTimestamp();
 
     const leaderboardText = await Promise.all(
@@ -57,15 +58,15 @@ export default {
           else if (index === 2) rankPrefix = '🥉';
           else rankPrefix = `**${index + 1}.**`;
 
-          return `${rankPrefix} ${userMention} - Level ${user.level} (${user.xp}/${xpForNextLevel} XP)`;
+          return `${rankPrefix} ${userMention} - المستوى ${user.level} (${user.xp}/${xpForNextLevel} نقطة)`;
         } catch {
-          return `**${index + 1}.** Error loading user ${user.userId}`;
+          return `**${index + 1}.** خطأ في تحميل بيانات العضو ${user.userId}`;
         }
       })
     );
 
     embed.addFields({
-      name: 'Rankings',
+      name: 'التصنيف',
       value: leaderboardText.join('\n')
     });
 
