@@ -4,14 +4,15 @@ import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 import { getUserLevelData, getLevelingConfig, getXpForLevel } from '../../services/leveling/leveling.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
+
 export default {
   data: new SlashCommandBuilder()
     .setName('rank')
-    .setDescription("Check your or another user's rank and level")
+    .setDescription('التحقق من رتبتك أو رتبة عضو آخر ومستواه')
     .addUserOption((option) =>
       option
         .setName('user')
-        .setDescription('The user to check the rank of')
+        .setDescription('العضو المراد التحقق من رتبته')
         .setRequired(false)
     )
     .setDMPermission(false),
@@ -26,7 +27,7 @@ export default {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
-            .setDescription('The leveling system is currently disabled on this server.')
+            .setDescription('نظام المستويات معطل حالياً في هذا السيرفر.')
         ],
         flags: MessageFlags.Ephemeral
       });
@@ -42,7 +43,7 @@ export default {
       throw new TitanBotError(
         `User ${targetUser.id} not found in guild`,
         ErrorTypes.USER_INPUT,
-        'Could not find the specified user in this server.'
+        'تعذر العثور على العضو المحدد في هذا السيرفر.'
       );
     }
 
@@ -59,26 +60,26 @@ export default {
     const progressBar = createProgressBar(progress, 20);
 
     const embed = new EmbedBuilder()
-      .setTitle(`${member.displayName}'s Rank`)
+      .setTitle(`رتبة ${member.displayName}`)
       .setThumbnail(member.displayAvatarURL({ dynamic: true }))
       .addFields(
         {
-          name: 'Level',
+          name: 'المستوى',
           value: safeUserData.level.toString(),
           inline: true
         },
         {
-          name: 'XP',
+          name: 'نقاط الخبرة (XP)',
           value: `${safeUserData.xp}/${xpNeeded}`,
           inline: true
         },
         {
-          name: 'Total XP',
+          name: 'إجمالي النقاط',
           value: safeUserData.totalXp.toString(),
           inline: true
         },
         {
-          name: `Progress to Level ${safeUserData.level + 1}`,
+          name: `التقدم نحو المستوى ${safeUserData.level + 1}`,
           value: `${progressBar} ${progress}%`
         }
       )
