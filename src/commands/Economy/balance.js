@@ -8,11 +8,11 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('balance')
-        .setDescription("Check your or someone else's balance")
+        .setDescription('التحقق من رصيدك أو رصيد شخص آخر')
         .addUserOption(option =>
             option
                 .setName('user')
-                .setDescription('User to check balance for')
+                .setDescription('العضو المراد التحقق من رصيده')
                 .setRequired(false)
         ),
 
@@ -32,7 +32,7 @@ export default {
             throw createError(
                 "Bot user queried for balance",
                 ErrorTypes.VALIDATION,
-                "Bots don't have an economy balance."
+                "البوتات لا تمتلك رصيداً مالياً في النظام."
             );
         }
 
@@ -44,7 +44,7 @@ export default {
             throw createError(
                 "Failed to load economy data",
                 ErrorTypes.DATABASE,
-                "Failed to load economy data. Please try again later.",
+                "فشل في تحميل بيانات الاقتصاد. يرجى المحاولة مرة أخرى لاحقاً.",
                 { userId: targetUser.id, guildId }
             );
         }
@@ -55,28 +55,28 @@ export default {
         const bank = typeof userData.bank === 'number' ? userData.bank : 0;
 
             const embed = createEmbed({
-                title: `${targetUser.username}'s Balance`,
-                description: `Here is the current financial status for ${targetUser.username}.`,
+                title: `رصيد ${targetUser.username}`,
+                description: `إليك الحالة المالية الحالية لـ ${targetUser.username}.`,
             })
                 .addFields(
                     {
-                        name: "💵 Cash",
+                        name: "💵 الكاش (المحفظة)",
                         value: `$${wallet.toLocaleString()}`,
                         inline: true,
                     },
                     {
-                        name: "🏦 Bank",
+                        name: "🏦 البنك",
                         value: `$${bank.toLocaleString()} / $${maxBank.toLocaleString()}`,
                         inline: true,
                     },
                     {
-                        name: "💰 Total",
+                        name: "💰 المجموع الكلي",
                         value: `$${(wallet + bank).toLocaleString()}`,
                         inline: true,
                     }
                 )
                 .setFooter({
-                    text: `Requested by ${interaction.user.tag}`,
+                    text: `بواسطة ${interaction.user.tag}`,
                     iconURL: interaction.user.displayAvatarURL(),
                 });
 
