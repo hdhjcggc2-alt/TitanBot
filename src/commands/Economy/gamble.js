@@ -13,11 +13,11 @@ const GAMBLE_COOLDOWN = 5 * 60 * 1000;
 export default {
     data: new SlashCommandBuilder()
         .setName('gamble')
-        .setDescription('Gamble your money for a chance to win more')
+        .setDescription('المقامرة بأموالك للحصول على فرصة لمضاعفتها')
         .addIntegerOption(option =>
             option
                 .setName('amount')
-                .setDescription('Amount of cash to gamble')
+                .setDescription('مبلغ النقود المراد المقامرة به')
                 .setRequired(true)
                 .setMinValue(1)
         ),
@@ -32,9 +32,20 @@ export default {
             const now = Date.now();
 
             const userData = await getEconomyData(client, guildId, userId);
+            
+            if (!userData) {
+                throw createError(
+                    "Failed to load economy data",
+                    ErrorTypes.DATABASE,
+                    "فشل تحميل بيانات الاقتصاد الخاصة بك. يرجى المحاولة مرة أخرى لاحقاً.",
+                    { userId, guildId }
+                );
+            }
+
             const lastGamble = userData.lastGamble || 0;
-            let cloverCount = userData.inventory["lucky_clover"] || 0;
-            let charmCount = userData.inventory["lucky_charm"] || 0;
+            const inventory = userData.inventory || {};
+            let cloverCount = inventory["lucky_clover"] || 0;
+            let charmCount = inventory["lucky_charm"] || 0;
 
             if (now < lastGamble + GAMBLE_COOLDOWN) {
                 const remaining = lastGamble + GAMBLE_COOLDOWN - now;
@@ -44,7 +55,7 @@ export default {
                 throw createError(
                     "Gamble cooldown active",
                     ErrorTypes.RATE_LIMIT,
-                    `You need to cool down before gambling again. Wait **${minutes}m ${seconds}s**.`,
+                    `عليك الهدوء والانتظار قليلاً قبل المقامرة مرة أخرى. انتظر لمدة **${minutes} دقيقة و ${seconds} ثانية**.`,
                     { remaining, cooldownType: 'gamble' }
                 );
             }
@@ -53,7 +64,7 @@ export default {
                 throw createError(
                     "Insufficient cash for gamble",
                     ErrorTypes.VALIDATION,
-                    `You only have $${userData.wallet.toLocaleString()} cash, but you are trying to bet $${betAmount.toLocaleString()}.`,
+                    `أنت تملك $${userData.wallet.toLocaleString()} نقداً فقط، لكنك تحاول المراهنة بمبلغ $${betAmount.toLocaleString()}.`,
                     { required: betAmount, current: userData.wallet }
                 );
             }
@@ -66,14 +77,14 @@ export default {
             if (cloverCount > 0) {
                 winChance += CLOVER_WIN_BONUS;
                 userData.inventory["lucky_clover"] -= 1;
-                cloverMessage = `\n🍀 **Lucky Clover Consumed:** Your win chance was boosted!`;
+                cloverMessage = `\n🍀 **تم استهلاك نفل الحظ (Lucky Clover):** تم تعزيز فرصة فوزك!`;
                 usedClover = true;
             }
             
             else if (charmCount > 0) {
                 winChance += CHARM_WIN_BONUS;
                 userData.inventory["lucky_charm"] -= 1;
-                cloverMessage = `\n🍀 **Lucky Charm Used (${charmCount - 1} uses remaining):** Your win chance was boosted!`;
+                cloverMessage = `\n🍀 **تم استخدام تعويذة الحظ (${charmCount - 1} استخدامات متبقية):** تم تعزيز فرصة فوزك!`;
                 usedCharm = true;
             }
 
@@ -83,46 +94,45 @@ export default {
 
             if (win) {
                 const amountWon = Math.floor(betAmount * PAYOUT_MULTIPLIER);
-                // Net change: the bet is replaced by the payout (bet was at stake, not pre-deducted)
                 cashChange = amountWon - betAmount;
 
                 resultEmbed = successEmbed(
-                    "🎉 You Won!",
-                    `You successfully gambled and turned your **$${betAmount.toLocaleString()}** bet into **$${amountWon.toLocaleString()}**!${cloverMessage}`,
+                    "🎉 لقد فزت!",
+                    `لقد قمت بالمقامرة بنجاح وحولت رهانك البالغ **$${betAmount.toLocaleString()}** إلى **$${amountWon.toLocaleString()}**!${cloverMessage}`,
                 );
             } else {
-cashChange = -betAmount;
+                cashChange = -betAmount;
 
                 resultEmbed = warningEmbed(
-                    "💔 You Lost...",
-                    `The dice rolled against you. You lost your **$${betAmount.toLocaleString()}** bet.`,
+                    "💔 لقد خسرت...",
+                    `لم تكن النتيجة لصالحك. لقد خسرت رهانك البالغ **$${betAmount.toLocaleString()}**.`,
                 );
             }
 
-            userData.wallet = (userData.wallet || 0) + cashChange;
-userData.lastGamble = now;
+            userData.wallet = Math.max(0, (userData.wallet || 0) + cashChange);
+            userData.lastGamble = now;
 
             await setEconomyData(client, guildId, userId, userData);
 
             const newCash = userData.wallet;
 
             resultEmbed.addFields({
-                name: "New Cash Balance",
+                name: "رصيد النقود الجديد",
                 value: `$${newCash.toLocaleString()}`,
                 inline: true,
             });
 
             if (usedClover) {
                 resultEmbed.setFooter({
-                    text: `You have ${userData.inventory["lucky_clover"]} Lucky Clovers left. Win chance was ${Math.round(winChance * 100)}%.`,
+                    text: `لديك ${userData.inventory["lucky_clover"]} من نفل الحظ متبقية. كانت فرصة الفوز ${Math.round(winChance * 100)}%.`,
                 });
             } else if (usedCharm) {
                 resultEmbed.setFooter({
-                    text: `You have ${userData.inventory["lucky_charm"]} Lucky Charm uses left. Win chance was ${Math.round(winChance * 100)}%.`,
+                    text: `لديك ${userData.inventory["lucky_charm"]} من استخدامات تعويذة الحظ متبقية. كانت فرصة الفوز ${Math.round(winChance * 100)}%.`,
                 });
             } else {
                 resultEmbed.setFooter({
-                    text: `Next gamble available in 5 minutes. Base win chance: ${Math.round(BASE_WIN_CHANCE * 100)}%.`,
+                    text: `ستكون المقامرة القادمة متاحة خلال 5 دقائق. فرصة الفوز الأساسية: ${Math.round(BASE_WIN_CHANCE * 100)}%.`,
                 });
             }
 
