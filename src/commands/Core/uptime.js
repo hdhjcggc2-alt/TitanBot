@@ -1,12 +1,12 @@
 import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { createEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-
 import { InteractionHelper } from '../../utils/interactionHelper.js';
+
 export default {
     data: new SlashCommandBuilder()
     .setName("uptime")
-    .setDescription("Check how long the bot has been online"),
+    .setDescription("التحقق من مدة تشغيل البت واستمراريته"),
 
   async execute(interaction) {
     try {
@@ -20,11 +20,11 @@ export default {
       let minutes = Math.floor(totalSeconds / 60);
       let seconds = Math.floor(totalSeconds % 60);
 
-      const uptimeStr = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+      const uptimeStr = `${days} يوم, ${hours} ساعة, ${minutes} دقيقة, ${seconds} ثانية`;
 
       await InteractionHelper.safeEditReply(interaction, {
         embeds: [createEmbed({ 
-          title: "System Uptime", 
+          title: "⏱️ وقت تشغيل النظام", 
           description: `\`\`\`${uptimeStr}\`\`\`` 
         })],
       });
@@ -33,7 +33,7 @@ export default {
       
       try {
         return await InteractionHelper.safeEditReply(interaction, {
-          embeds: [createEmbed({ title: 'System Error', description: 'Could not compute uptime.', color: 'error' })],
+          embeds: [createEmbed({ title: 'خطأ في النظام', description: 'تعذر حساب وقت التشغيل.', color: 'error' })],
           flags: MessageFlags.Ephemeral,
         });
       } catch (replyError) {
