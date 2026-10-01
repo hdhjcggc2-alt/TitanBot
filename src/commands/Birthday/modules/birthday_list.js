@@ -4,6 +4,7 @@ import { deleteBirthday } from '../../../utils/database.js';
 import { logger } from '../../../utils/logger.js';
 
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
+
 export default {
     async execute(interaction, config, client) {
         await InteractionHelper.safeDefer(interaction);
@@ -15,8 +16,8 @@ export default {
         if (sortedBirthdays.length === 0) {
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
-                .setTitle('No Birthdays')
-                .setDescription('No birthdays have been set in this server yet.');
+                .setTitle('لا توجد أعياد ميلاد')
+                .setDescription('لم يتم تعيين أي أعياد ميلاد في هذا السيرفر بعد.');
             return await InteractionHelper.safeEditReply(interaction, {
                 embeds: [embed]
             });
@@ -35,7 +36,7 @@ export default {
                 continue;
             }
             displayIndex++;
-            birthdayList += `${displayIndex}. <@${birthday.userId}> - ${birthday.monthName} ${birthday.day}\n`;
+            birthdayList += `${displayIndex}. <@${birthday.userId}> - ${birthday.day} ${birthday.monthName}\n`;
         }
 
         if (fetchedMembers && staleUserIds.length > 0) {
@@ -47,19 +48,19 @@ export default {
         if (displayIndex === 0) {
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
-                .setTitle('No Birthdays')
-                .setDescription('No birthdays have been set by current server members.');
+                .setTitle('لا توجد أعياد ميلاد')
+                .setDescription('لم يتم تعيين أي أعياد ميلاد بواسطة أعضاء السيرفر الحاليين.');
             return await InteractionHelper.safeEditReply(interaction, {
                 embeds: [embed]
             });
         }
 
-        birthdayList = `**${displayIndex} birthday${displayIndex !== 1 ? 's' : ''} in ${interaction.guild.name}**\n\n` + birthdayList;
+        birthdayList = `**يوجد ${displayIndex} عيد ميلاد في ${interaction.guild.name}**\n\n` + birthdayList;
 
         const embed = new EmbedBuilder()
             .setColor(0x00FF00)
-            .setTitle('Server Birthdays')
-            .setDescription(`${birthdayList}\n\nTotal: ${displayIndex} birthday${displayIndex !== 1 ? 's' : ''}`);
+            .setTitle('أعياد ميلاد السيرفر')
+            .setDescription(`${birthdayList}\n\nالإجمالي: ${displayIndex} عيد ميلاد`);
 
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [embed]
