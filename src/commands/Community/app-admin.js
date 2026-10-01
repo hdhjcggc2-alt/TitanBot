@@ -22,10 +22,10 @@ import appDashboard from './modules/app_dashboard.js';
 function getApplicationStatusPresentation(statusValue) {
     const normalized = typeof statusValue === 'string' ? statusValue.trim().toLowerCase() : 'unknown';
     const statusLabel =
-        normalized === 'pending' ? 'In Progress' :
-        normalized === 'approved' ? 'Accepted' :
-        normalized === 'denied' ? 'Denied' :
-        'Unknown';
+        normalized === 'pending' ? 'قيد المراجعة' :
+        normalized === 'approved' ? 'مقبول' :
+        normalized === 'denied' ? 'مرفوض' :
+        'غير معروف';
     const statusEmoji =
         normalized === 'pending' ? '🟡' :
         normalized === 'approved' ? '🟢' :
@@ -38,49 +38,49 @@ function getApplicationStatusPresentation(statusValue) {
 export default {
     data: new SlashCommandBuilder()
     .setName("app-admin")
-    .setDescription("Manage staff applications")
+    .setDescription("إدارة طلبات التقديم الخاصة بالإدارة والرتب")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .addSubcommand((subcommand) =>
         subcommand
             .setName("setup")
-            .setDescription("Set up a new application")
+            .setDescription("إعداد نظام تقديم جديد")
     )
     .addSubcommand((subcommand) =>
         subcommand
             .setName("review")
-            .setDescription("Approve or deny an application")
+            .setDescription("مراجعة طلب بالقبول أو الرفض")
             .addStringOption((option) =>
                 option
                     .setName("id")
-                    .setDescription("The application ID")
+                    .setDescription("معرف الطلب")
                     .setRequired(true),
             ),
     )
     .addSubcommand((subcommand) =>
         subcommand
             .setName("list")
-            .setDescription("List all applications")
+            .setDescription("عرض جميع الطلبات المقدمة")
             .addStringOption((option) =>
                 option
                     .setName("status")
-                    .setDescription("Filter by status")
+                    .setDescription("تصفية حسب الحالة")
                     .addChoices(
-                        { name: "Pending", value: "pending" },
-                        { name: "Approved", value: "approved" },
-                        { name: "Denied", value: "denied" },
+                        { name: "قيد المراجعة", value: "pending" },
+                        { name: "مقبول", value: "approved" },
+                        { name: "مرفوض", value: "denied" },
                     ),
             )
             .addStringOption((option) =>
-                option.setName("role").setDescription("Filter by role ID"),
+                option.setName("role").setDescription("تصفية حسب معرف الرتبة"),
             )
             .addUserOption((option) =>
-                option.setName("user").setDescription("Filter by user"),
+                option.setName("user").setDescription("تصفية حسب العضو"),
             )
             .addNumberOption((option) =>
                 option
                     .setName("limit")
                     .setDescription(
-                        "Maximum number of applications to show (default: 10)",
+                        "الحد الأقصى لعدد الطلبات المعروضة (الافتراضي: 10)",
                     )
                     .setMinValue(1)
                     .setMaxValue(25),
@@ -89,11 +89,11 @@ export default {
     .addSubcommand((subcommand) =>
         subcommand
             .setName("dashboard")
-            .setDescription("Open the applications configuration dashboard")
+            .setDescription("فتح لوحة التحكم الخاصة بإعدادات الطلبات")
             .addStringOption((option) =>
                 option
                     .setName("application")
-                    .setDescription("Select an application to configure")
+                    .setDescription("اختر طلباً محدداً لضبط إعداداته")
                     .setRequired(false)
                     .setAutocomplete(true),
             ),
@@ -103,7 +103,7 @@ export default {
 
     execute: withErrorHandling(async (interaction) => {
         if (!interaction.inGuild()) {
-            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'This command can only be used in a server.' });
+            return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'لا يمكن استخدام هذا الأمر إلا داخل السيرفرات.' });
         }
 
         const { options, guild, member } = interaction;
@@ -135,58 +135,57 @@ export default {
 };
 
 async function handleSetup(interaction) {
-    
     if (interaction.deferred || interaction.replied) {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'This interaction has already been processed. Please try the command again.' });
+        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'تمت معالجة هذا التفاعل بالفعل. يرجى إعادة محاولة الأمر.' });
     }
 
     const modal = new ModalBuilder()
         .setCustomId('app_setup_modal')
-        .setTitle('Set Up New Application');
+        .setTitle('إعداد طلب جديد');
 
     const roleSelect = new RoleSelectMenuBuilder()
         .setCustomId('role_id')
-        .setPlaceholder('Select the role users will apply for')
+        .setPlaceholder('اختر الرتبة التي سيقدم عليها الأعضاء')
         .setRequired(true);
 
     const roleLabel = new LabelBuilder()
-        .setLabel('Application Role')
-        .setDescription('The role that users will be applying for')
+        .setLabel('رتبة التقديم')
+        .setDescription('الرتبة التي سيحصل عليها العضو عند قبول طلبه')
         .setRoleSelectMenuComponent(roleSelect);
 
     const appNameInput = new TextInputBuilder()
         .setCustomId('app_name')
         .setStyle(TextInputStyle.Short)
-        .setPlaceholder('e.g., Moderator, Helper, Developer')
+        .setPlaceholder('مثال: مشرف، مساعد، مطور')
         .setMaxLength(50)
         .setMinLength(1)
         .setRequired(true);
 
     const appNameLabel = new LabelBuilder()
-        .setLabel('Application Name')
+        .setLabel('اسم التقديم')
         .setTextInputComponent(appNameInput);
 
     const q1Input = new TextInputBuilder()
         .setCustomId('app_question_1')
         .setStyle(TextInputStyle.Short)
-        .setPlaceholder('Why do you want this role?')
+        .setPlaceholder('لماذا تريد الحصول على هذه الرتبة؟')
         .setMaxLength(100)
         .setMinLength(1)
         .setRequired(true);
 
     const q1Label = new LabelBuilder()
-        .setLabel('Question 1 (required)')
+        .setLabel('السؤال الأول (إجباري)')
         .setTextInputComponent(q1Input);
 
     const q2Input = new TextInputBuilder()
         .setCustomId('app_question_2')
         .setStyle(TextInputStyle.Short)
-        .setPlaceholder('What experience do you have?')
+        .setPlaceholder('ما هي خبرتك السابقة؟')
         .setMaxLength(100)
         .setRequired(false);
 
     const q2Label = new LabelBuilder()
-        .setLabel('Question 2 (optional)')
+        .setLabel('السؤال الثاني (اختياري)')
         .setTextInputComponent(q2Input);
 
     const q3Input = new TextInputBuilder()
@@ -196,7 +195,7 @@ async function handleSetup(interaction) {
         .setRequired(false);
 
     const q3Label = new LabelBuilder()
-        .setLabel('Question 3 (optional)')
+        .setLabel('السؤال الثالث (اختياري)')
         .setTextInputComponent(q3Input);
 
     modal.addLabelComponents(roleLabel, appNameLabel, q1Label, q2Label, q3Label);
@@ -220,7 +219,7 @@ async function handleSetup(interaction) {
     const roleId = selectedRoles.first()?.id;
 
     if (!roleId) {
-        await replyUserError(submitted, { type: ErrorTypes.USER_INPUT, message: 'You must select a role for the application.' });
+        await replyUserError(submitted, { type: ErrorTypes.USER_INPUT, message: 'يجب عليك تحديد رتبة للتقديم.' });
         return;
     }
 
@@ -232,13 +231,13 @@ async function handleSetup(interaction) {
 
     const role = await interaction.guild.roles.fetch(roleId).catch(() => null);
     if (!role) {
-        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'The selected role could not be found.' });
+        await replyUserError(submitted, { type: ErrorTypes.VALIDATION, message: 'لم يتم العثور على الرتبة المحددة.' });
         return;
     }
 
     const existingRoles = await getApplicationRoles(interaction.client, interaction.guild.id);
     if (existingRoles.some(r => r.roleId === roleId)) {
-        await replyUserError(submitted, { type: ErrorTypes.CONFIGURATION, message: `The role ${role} is already configured as an application.` });
+        await replyUserError(submitted, { type: ErrorTypes.CONFIGURATION, message: `الرتبة ${role} تم إعدادها مسبقاً كنظام تقديم.` });
         return;
     }
 
@@ -259,8 +258,8 @@ async function handleSetup(interaction) {
 
     await submitted.reply({
         embeds: [successEmbed(
-            '✅ Application Created',
-            `**${appName}** application has been created for ${role}.\n\nYou can customize the log channel, manager roles, questions, and retention period in the dashboard.`,
+            '✅ تم إنشاء التقديم',
+            `تم إنشاء نظام التقديم **${appName}** للرتبة ${role}.\n\nيمكنك تخصيص روم السجلات، رتب المراجعين، الأسئلة، ومدة الاحتفاظ من لوحة التحكم.`,
         )],
         flags: ['Ephemeral'],
     });
@@ -279,24 +278,24 @@ async function handleReview(interaction) {
         appId,
     );
     if (!application) {
-        return await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: 'Application not found.' });
+        return await replyUserError(interaction, { type: ErrorTypes.USER_INPUT, message: 'لم يتم العثور على الطلب.' });
     }
 
     if (application.status !== "pending") {
-        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'This application has already been processed.' });
+        return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: 'تمت معالجة هذا الطلب سابقاً.' });
     }
 
     const appEmbed = createEmbed({
-        title: `Review Application`,
-        description: `**User:** <@${application.userId}>\n**Application:** ${application.roleName}\n**Application ID:** \`${appId}\``,
+        title: `مراجعة الطلب`,
+        description: `**المستخدم:** <@${application.userId}>\n**التقديم:** ${application.roleName}\n**معرف الطلب:** \`${appId}\``,
         color: 'info',
     });
 
     if (application.answers && application.answers.length > 0) {
         application.answers.forEach((item, index) => {
             appEmbed.addFields({
-                name: `Q${index + 1}: ${item.question}`,
-                value: item.answer || '*No answer provided*',
+                name: `س${index + 1}: ${item.question}`,
+                value: item.answer || '*لم يتم تقديم إجابة*',
                 inline: false
             });
         });
@@ -305,11 +304,11 @@ async function handleReview(interaction) {
     const buttonRow = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`app_review_approve_${appId}`)
-            .setLabel('Approve')
+            .setLabel('قبول')
             .setStyle(ButtonStyle.Success),
         new ButtonBuilder()
             .setCustomId(`app_review_deny_${appId}`)
-            .setLabel('Deny')
+            .setLabel('رفض')
             .setStyle(ButtonStyle.Danger),
     );
 
@@ -334,15 +333,15 @@ async function handleReview(interaction) {
 
         const reasonModal = new ModalBuilder()
             .setCustomId(`app_review_reason_${appId}_${isApprove ? 'approve' : 'deny'}`)
-            .setTitle(`${isApprove ? 'Approve' : 'Deny'} Application - Reason`);
+            .setTitle(`${isApprove ? 'قبول' : 'رفض'} الطلب - السبب`);
 
         reasonModal.addComponents(
             new ActionRowBuilder().addComponents(
                 new TextInputBuilder()
                     .setCustomId('review_reason')
-                    .setLabel('Reason (optional)')
+                    .setLabel('السبب (اختياري)')
                     .setStyle(TextInputStyle.Paragraph)
-                    .setPlaceholder('Provide a reason for this decision...')
+                    .setPlaceholder('اكتب سبب اتخاذ هذا القرار...')
                     .setMaxLength(500)
                     .setRequired(false),
             ),
@@ -360,7 +359,7 @@ async function handleReview(interaction) {
 
             if (!reasonSubmit) return;
 
-            const reason = reasonSubmit.fields.getTextInputValue('review_reason').trim() || "No reason provided.";
+            const reason = reasonSubmit.fields.getTextInputValue('review_reason').trim() || "لم يتم تقديم سبب.";
             const action = isApprove ? 'approve' : 'deny';
             const status = isApprove ? 'approved' : 'denied';
 
@@ -380,10 +379,10 @@ async function handleReview(interaction) {
                 const statusColor = getApplicationStatusColor(status);
                 const reviewStatus = getApplicationStatusPresentation(status);
                 const dmEmbed = createEmbed({
-                    title: `${reviewStatus.statusEmoji} Application ${reviewStatus.statusLabel}`,
-                    description: `Your application for **${application.roleName}** has been **${status}**\n` +
-                        `**Note:** ${reason}\n\n` +
-                        `Use \`/apply status id:${appId}\` to view details.`
+                    title: `${reviewStatus.statusEmoji} نتيجة الطلب: ${reviewStatus.statusLabel}`,
+                    description: `طلبك لـ **${application.roleName}** أصبح حالة **${reviewStatus.statusLabel}**\n` +
+                        `**ملاحظة:** ${reason}\n\n` +
+                        `استخدم \`/apply status id:${appId}\` لعرض التفاصيل.`
                 }).setColor(statusColor);
 
                 await user.send({ embeds: [dmEmbed] });
@@ -412,7 +411,7 @@ async function handleReview(interaction) {
                                 const newEmbed = EmbedBuilder.from(embed)
                                     .setColor(statusColor)
                                     .spliceFields(0, 1, {
-                                        name: "Status",
+                                        name: "الحالة",
                                         value: `${reviewStatus.statusEmoji} ${reviewStatus.statusLabel}`,
                                     });
 
@@ -448,11 +447,12 @@ async function handleReview(interaction) {
                 }
             }
 
+            const statusTranslated = isApprove ? 'قبوله' : 'رفضه';
             await reasonSubmit.reply({
                 embeds: [
                     successEmbed(
-                        `Application ${status}`,
-                        `The application has been **${status}**.`,
+                        `تم معالجة الطلب`,
+                        `تم **${statusTranslated}** بنجاح.`,
                     ),
                 ],
                 flags: ["Ephemeral"],
@@ -460,15 +460,15 @@ async function handleReview(interaction) {
 
         } catch (error) {
             logger.error('Error reviewing application:', error);
-            await replyUserError(buttonInteraction, { type: ErrorTypes.UNKNOWN, message: 'An error occurred while reviewing the application.' });
+            await replyUserError(buttonInteraction, { type: ErrorTypes.UNKNOWN, message: 'حدث خطأ أثناء مراجعة الطلب.' });
         }
     });
 
     collector.on('end', async (collected, reason) => {
         if (reason === 'time') {
             const timeoutEmbed = createEmbed({
-                title: 'Review Timeout',
-                description: 'The review buttons have timed out.',
+                title: 'انتهت المهلة',
+                description: 'انتهت مهلة أزرار المراجعة.',
                 color: 'warning',
             });
 
@@ -506,7 +506,6 @@ async function handleList(interaction) {
                     await interaction.guild.members.fetch(app.userId);
                     return app; 
                 } catch {
-                    
                     await deleteApplication(interaction.client, interaction.guild.id, app.id, app.userId);
                     return null; 
                 }
@@ -523,61 +522,8 @@ async function handleList(interaction) {
         
         if (applicationRoles.length > 0) {
             const embed = createEmbed({ 
-                title: "No Applications Found", 
-                description: "No submitted applications found matching the specified criteria.\n\nHowever, the following application roles are configured:" 
+                title: "لم يتم العثور على طلبات", 
+                description: "لا توجد طلبات مقدمة تطابق معايير البحث المحددة.",
+                color: 'warning'
             });
-
-            applicationRoles.forEach((appRole, index) => {
-                const role = interaction.guild.roles.cache.get(appRole.roleId);
-                embed.addFields({
-                    name: `${index + 1}. ${appRole.name}`,
-                    value: `**Role:** ${role ?`<@&${appRole.roleId}>`: 'Role not found'}\n**Available for applications:** Yes`,
-                    inline: false
-                });
-            });
-
-            embed.setFooter({
-                text: "Users can apply with /apply submit or see available roles with /apply list"
-            });
-
-            return InteractionHelper.safeEditReply(interaction, { embeds: [embed], flags: ["Ephemeral"] });
-        } else {
-            return await replyUserError(interaction, {
-                type: ErrorTypes.CONFIGURATION,
-                message: 'No applications found and no application roles configured.\n' +
-                    'Use `/app-admin roles add` to configure application roles first.'
-            });
-        }
-    }
-
-    applications = applications
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .slice(0, limit);
-
-    const embed = createEmbed({ title: "Submitted Applications", description: `Showing ${applications.length} applications.`, });
-
-    applications.forEach((app) => {
-        const statusView = getApplicationStatusPresentation(app?.status);
-        const roleName = app?.roleName || 'Unknown Role';
-        const username = app?.username || 'Unknown User';
-        const createdAt = app?.createdAt ? new Date(app.createdAt) : null;
-        const createdAtDisplay = createdAt && !Number.isNaN(createdAt.getTime())
-            ? createdAt.toLocaleString()
-            : 'Unknown date';
-
-        embed.addFields({
-            name: `${statusView.statusEmoji} ${roleName} - ${username}`,
-            value:
-                `**ID:** \`${app.id}\`\n` +
-                `**Status:** ${statusView.statusEmoji} ${statusView.statusLabel}\n` +
-                `**Date:** ${createdAtDisplay}`,
-            inline: true,
-        });
-    });
-
-    await InteractionHelper.safeEditReply(interaction, {
-        embeds: [embed],
-        flags: ["Ephemeral"],
-    });
-}
-
+            return await InteractionHelper.safeEditReply(interactio
