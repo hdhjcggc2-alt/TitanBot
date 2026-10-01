@@ -2,20 +2,20 @@ import { SlashCommandBuilder, EmbedBuilder, MessageFlags } from 'discord.js';
 import { logger } from '../../utils/logger.js';
 import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 import { getUserLevelData, getLevelingConfig, getXpForLevel } from '../../services/leveling/leveling.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
 
+import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('rank')
-    .setDescription('عرض الرتبة والمستوى الخاص بك أو لمستخدم آخر')
+    .setDescription("Check your or another user's rank and level")
     .addUserOption((option) =>
       option
         .setName('user')
-        .setDescription('المستخدم المراد فحص رتبته')
+        .setDescription('The user to check the rank of')
         .setRequired(false)
     )
     .setDMPermission(false),
-  category: 'المستويات',
+  category: 'Leveling',
 
   async execute(interaction, config, client) {
     await InteractionHelper.safeDefer(interaction);
@@ -26,7 +26,7 @@ export default {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
-            .setDescription('⚠️ نظام المستويات معطل حالياً في هذا السيرفر.')
+            .setDescription('The leveling system is currently disabled on this server.')
         ],
         flags: MessageFlags.Ephemeral
       });
@@ -42,7 +42,7 @@ export default {
       throw new TitanBotError(
         `User ${targetUser.id} not found in guild`,
         ErrorTypes.USER_INPUT,
-        'تعذر العثور على المستخدم المحدد في هذا السيرفر.'
+        'Could not find the specified user in this server.'
       );
     }
 
@@ -59,26 +59,26 @@ export default {
     const progressBar = createProgressBar(progress, 20);
 
     const embed = new EmbedBuilder()
-      .setTitle(`رتبة ${member.displayName}`)
+      .setTitle(`${member.displayName}'s Rank`)
       .setThumbnail(member.displayAvatarURL({ dynamic: true }))
       .addFields(
         {
-          name: 'المستوى',
+          name: 'Level',
           value: safeUserData.level.toString(),
           inline: true
         },
         {
-          name: 'نقاط الخبرة (XP)',
+          name: 'XP',
           value: `${safeUserData.xp}/${xpNeeded}`,
           inline: true
         },
         {
-          name: 'إجمالي الـ XP',
+          name: 'Total XP',
           value: safeUserData.totalXp.toString(),
           inline: true
         },
         {
-          name: `التقدم للمستوى ${safeUserData.level + 1}`,
+          name: `Progress to Level ${safeUserData.level + 1}`,
           value: `${progressBar} ${progress}%`
         }
       )
