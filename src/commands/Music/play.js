@@ -4,23 +4,23 @@ import { playQuery, replyMusicSuccess } from '../../services/music/musicActions.
 
 export default {
     slashOnly: true,
-    category: 'الموسيقى',
+    category: 'Music',
     data: new SlashCommandBuilder()
         .setName('play')
-        .setDescription('تشغيل أغنية أو إضافتها إلى قائمة الانتظار')
+        .setDescription('Play a song or add it to the queue via search or URL')
         .addStringOption((opt) =>
             opt.setName('query')
-               .setDescription('اسم الأغنية، رابط مباشر، أو مصطلح بحث')
+               .setDescription('Song name, artist, or direct URL')
                .setRequired(true),
         )
         .addStringOption((opt) =>
             opt.setName('platform')
-               .setDescription('اختر منصة البحث المفضلة (اختياري)')
+               .setDescription('Choose preferred search platform (optional)')
                .setRequired(false)
                .addChoices(
-                   { name: 'يوتيوب (YouTube)', value: 'ytsearch' },
-                   { name: 'يوتيوب ميوزك (YouTube Music)', value: 'ytmsearch' },
-                   { name: 'سبوتيفاي (Spotify)', value: 'spsearch' }
+                   { name: 'YouTube', value: 'ytsearch' },
+                   { name: 'YouTube Music', value: 'ytmsearch' },
+                   { name: 'Spotify', value: 'spsearch' }
                )
         ),
 
@@ -33,10 +33,11 @@ export default {
         let query = interaction.options.getString('query').trim();
         const platform = interaction.options.getString('platform');
 
-        // إذا قام المستخدم بتحديد منصة بحث معينة ولم يكن النص رابطاً مباشراً، نقوم بدمج البادئة الخاصة بها
         const isUrl = /^https?:\/\//i.test(query);
         if (platform && !isUrl) {
             query = `${platform}:${query}`;
+        } else if (!isUrl) {
+            query = `ytsearch:${query}`;
         }
 
         const result = await playQuery(client, interaction, query);
