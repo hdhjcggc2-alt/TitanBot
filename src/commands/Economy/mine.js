@@ -11,17 +11,17 @@ const PICKAXE_MULTIPLIER = 1.2;
 const DIAMOND_PICKAXE_MULTIPLIER = 2.0;
 
 const MINE_LOCATIONS = [
-    "abandoned gold mine",
-    "dark, damp cave",
-    "backyard rock quarry",
-    "volcanic obsidian vent",
-    "deep-sea mineral trench",
+    "منجم ذهب مهجور",
+    "كهف مظلم ورطب",
+    "محجر صخور خلفي",
+    "فتحة بركانية من الزجاج البركاني",
+    "خندق معادن في أعماق البحار",
 ];
 
 export default {
     data: new SlashCommandBuilder()
         .setName('mine')
-        .setDescription('Go mining to earn money'),
+        .setDescription('الذهاب للتعدين لكسب الأموال'),
 
     execute: withErrorHandling(async (interaction, config, client) => {
         const deferred = await InteractionHelper.safeDefer(interaction);
@@ -32,9 +32,20 @@ export default {
             const now = Date.now();
 
             const userData = await getEconomyData(client, guildId, userId);
+            
+            if (!userData) {
+                throw createError(
+                    "Failed to load economy data",
+                    ErrorTypes.DATABASE,
+                    "فشل تحميل بيانات الاقتصاد الخاصة بك. يرجى المحاولة مرة أخرى لاحقاً.",
+                    { userId, guildId }
+                );
+            }
+
             const lastMine = userData.lastMine || 0;
-            const hasDiamondPickaxe = userData.inventory["diamond_pickaxe"] || 0;
-            const hasPickaxe = userData.inventory["pickaxe"] || 0;
+            const inventory = userData.inventory || {};
+            const hasDiamondPickaxe = inventory["diamond_pickaxe"] || 0;
+            const hasPickaxe = inventory["pickaxe"] || 0;
 
             if (now < lastMine + MINE_COOLDOWN) {
                 const remaining = lastMine + MINE_COOLDOWN - now;
@@ -46,7 +57,7 @@ export default {
                 throw createError(
                     "Mining cooldown active",
                     ErrorTypes.RATE_LIMIT,
-                    `Your pickaxe is cooling down. Wait for **${hours}h ${minutes}m** before mining again.`,
+                    `معولك بحاجة للبرود والراحة. انتظر لمدة **${hours} ساعة و ${minutes} دقيقة** قبل التعدين مرة أخرى.`,
                     { remaining, cooldownType: 'mine' }
                 );
             }
@@ -61,10 +72,10 @@ export default {
 
             if (hasDiamondPickaxe > 0) {
                 finalEarned = Math.floor(baseEarned * DIAMOND_PICKAXE_MULTIPLIER);
-                multiplierMessage = `\n💎 **Diamond Pickaxe Bonus: +100%**`;
+                multiplierMessage = `\n💎 **مكافأة المعول الماسي: +100%**`;
             } else if (hasPickaxe > 0) {
                 finalEarned = Math.floor(baseEarned * PICKAXE_MULTIPLIER);
-                multiplierMessage = `\n⛏️ **Pickaxe Bonus: +20%**`;
+                multiplierMessage = `\n⛏️ **مكافأة المعول: +20%**`;
             }
 
             const location =
@@ -72,21 +83,21 @@ export default {
                     Math.floor(Math.random() * MINE_LOCATIONS.length)
                 ];
 
-            userData.wallet += finalEarned;
-userData.lastMine = now;
+            userData.wallet = (userData.wallet || 0) + finalEarned;
+            userData.lastMine = now;
 
             await setEconomyData(client, guildId, userId, userData);
 
             const embed = successEmbed(
-                "💰 Mining Expedition Successful!",
-                `You explored a **${location}** and managed to find minerals worth **$${finalEarned.toLocaleString()}**!${multiplierMessage}`,
+                "💰 نجحت رحلة التعدين!",
+                `لقد استكشفت **${location}** واستطعت العثور على معادن بقيمة **$${finalEarned.toLocaleString()}**!${multiplierMessage}`,
             )
                 .addFields({
-                    name: "New Cash Balance",
+                    name: "رصيد النقود الجديد",
                     value: `$${userData.wallet.toLocaleString()}`,
                     inline: true,
                 })
-                .setFooter({ text: `Next mine available in 1 hour.` });
+                .setFooter({ text: `ستكون عملية التعدين القادمة متاحة خلال ساعة واحدة.` });
 
             await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
     }, { command: 'mine' })
