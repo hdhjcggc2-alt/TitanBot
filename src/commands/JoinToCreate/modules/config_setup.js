@@ -33,57 +33,57 @@ export default {
             throw new TitanBotError(
                 `Channel ${triggerChannel.id} is not a Join to Create trigger`,
                 ErrorTypes.VALIDATION,
-                `${triggerChannel} is not configured as a Join to Create trigger channel.`
+                `القناة ${triggerChannel} غير مُعرّفة كقناة إنشاء تلقائي.`
             );
         }
 
         const embed = new EmbedBuilder()
-            .setTitle('Join to Create Configuration')
-            .setDescription(`Configure settings for ${triggerChannel}`)
+            .setTitle('إعدادات نظام الإنشاء التلقائي')
+            .setDescription(`تخصيص إعدادات القناة ${triggerChannel}`)
             .setColor(getColor('info'))
             .addFields(
                 {
-                    name: 'Current Channel Name Template',
+                    name: 'قالب اسم القناة الحالي',
                     value: `\`${currentConfig.channelOptions?.[triggerChannel.id]?.nameTemplate || currentConfig.channelNameTemplate}\``,
                     inline: false
                 },
                 {
-                    name: 'Current User Limit',
-                    value: `${currentConfig.channelOptions?.[triggerChannel.id]?.userLimit || currentConfig.userLimit === 0 ? 'No limit' : currentConfig.userLimit + ' users'}`,
+                    name: 'الحد الأقصى للمستخدمين الحالي',
+                    value: `${(currentConfig.channelOptions?.[triggerChannel.id]?.userLimit ?? currentConfig.userLimit) === 0 ? 'بلا حدود' : (currentConfig.channelOptions?.[triggerChannel.id]?.userLimit ?? currentConfig.userLimit) + ' مستخدمين'}`,
                     inline: true
                 },
                 {
-                    name: 'Current Bitrate',
-                    value: `${(currentConfig.channelOptions?.[triggerChannel.id]?.bitrate || currentConfig.bitrate) / 1000} kbps`,
+                    name: 'جودة الصوت (Bitrate) الحالية',
+                    value: `${((currentConfig.channelOptions?.[triggerChannel.id]?.bitrate || currentConfig.bitrate) || 64000) / 1000} kbps`,
                     inline: true
                 }
             )
-            .setFooter({ text: 'Select an option to configure below' })
+            .setFooter({ text: 'اختر أحد الخيارات أدناه للتعديل' })
             .setTimestamp();
 
         const selectMenu = new StringSelectMenuBuilder()
             .setCustomId(`jointocreate_config_${triggerChannel.id}`)
-            .setPlaceholder('Select a configuration option')
+            .setPlaceholder('اختر خيار التكوين المطلوب...')
             .addOptions(
                 new StringSelectMenuOptionBuilder()
-                    .setLabel('Change Channel Name Template')
-                    .setDescription('Modify the template for temporary channel names')
+                    .setLabel('تغيير قالب اسم القناة')
+                    .setDescription('تعديل القالب المستخدم لتسمية القنوات المؤقتة')
                     .setValue('name_template'),
                 new StringSelectMenuOptionBuilder()
-                    .setLabel('Change User Limit')
-                    .setDescription('Set maximum users per temporary channel')
+                    .setLabel('تغيير حد المستخدمين')
+                    .setDescription('تحديد الحد الأقصى للمستخدمين في كل قناة مؤقتة')
                     .setValue('user_limit'),
                 new StringSelectMenuOptionBuilder()
-                    .setLabel('Change Bitrate')
-                    .setDescription('Adjust audio quality for temporary channels')
+                    .setLabel('تغيير جودة الصوت')
+                    .setDescription('ضبط جودة الصوت للقنوات المؤقتة')
                     .setValue('bitrate'),
                 new StringSelectMenuOptionBuilder()
-                    .setLabel('Remove This Trigger Channel')
-                    .setDescription('Remove this channel from the Join to Create system')
+                    .setLabel('إزالة قناة التشغيل هذه')
+                    .setDescription('إزالة هذه القناة من نظام الإنشاء التلقائي')
                     .setValue('remove_trigger'),
                 new StringSelectMenuOptionBuilder()
-                    .setLabel('View Current Settings')
-                    .setDescription('Show all current configuration details')
+                    .setLabel('عرض الإعدادات الحالية')
+                    .setDescription('عرض كافة تفاصيل التكوين الحالي')
                     .setValue('view_settings')
             );
 
@@ -99,7 +99,7 @@ export default {
         const collector = interaction.channel.createMessageComponentCollector({
             componentType: ComponentType.StringSelect,
             filter: (i) => i.user.id === interaction.user.id && i.customId === `jointocreate_config_${triggerChannel.id}`,
-time: 60000
+            time: 60000
         });
 
         collector.on('collect', async (selectInteraction) => {
@@ -133,8 +133,8 @@ time: 60000
                 }
                 
                 const errorMessage = error instanceof TitanBotError 
-                    ? error.userMessage || 'An error occurred while processing your selection.'
-                    : 'An error occurred while processing your selection.';
+                    ? error.userMessage || 'حدث خطأ أثناء معالجة اختيارك.'
+                    : 'حدث خطأ أثناء معالجة اختيارك.';
                     
                 await replyUserError(selectInteraction, {
                     type: ErrorTypes.CONFIGURATION,
@@ -162,7 +162,7 @@ time: 60000
             throw new TitanBotError(
                 `Config setup failed: ${error.message}`,
                 ErrorTypes.UNKNOWN,
-                'Failed to configure Join to Create system.'
+                'فشل إعداد نظام الإنشاء التلقائي.'
             );
         }
     }
@@ -170,28 +170,28 @@ time: 60000
 
 async function handleNameTemplateChange(interaction, triggerChannel, currentConfig, client) {
     const embed = new EmbedBuilder()
-        .setTitle('Channel Name Template Configuration')
-        .setDescription('Please enter the new channel name template.')
+        .setTitle('تكوين قالب اسم القناة')
+        .setDescription('الرجاء إدخال قالب اسم القناة الجديد في الشات أدناه.')
         .addFields(
             {
-                name: 'Available Variables',
-                value: '• `{username}` - User\'s username\n• `{display_name}` - User\'s display name\n• `{user_tag}` - User\'s tag (User#1234)\n• `{guild_name}` - Server name',
+                name: 'المتغيرات المتاحة',
+                value: '• `{username}` - اسم المستخدم\n• `{display_name}` - الاسم المعروض\n• `{user_tag}` - معرف المستخدم (Tag)\n• `{guild_name}` - اسم السيرفر',
                 inline: false
             },
             {
-                name: 'Current Template',
+                name: 'القالب الحالي',
                 value: `\`${currentConfig.channelOptions?.[triggerChannel.id]?.nameTemplate || currentConfig.channelNameTemplate}\``,
                 inline: false
             }
         )
         .setColor(getColor('info'))
-        .setFooter({ text: 'Type your new template in the chat below' });
+        .setFooter({ text: 'اكتب القالب الجديد في المحادثة أدناه' });
 
     await interaction.followUp({ embeds: [embed], flags: MessageFlags.Ephemeral });
 
     const collector = interaction.channel.createMessageCollector({
         filter: (m) => m.author.id === interaction.user.id,
-time: 600_000,
+        time: 600_000,
         max: 1
     });
 
@@ -202,7 +202,7 @@ time: 600_000,
             if (!newTemplate || newTemplate.length > 100) {
                 await replyUserError(interaction, {
                     type: ErrorTypes.VALIDATION,
-                    message: 'Template must be between 1 and 100 characters.'
+                    message: 'يجب أن يكون القالب بين 1 و 100 حرف.'
                 });
                 return;
             }
@@ -218,7 +218,7 @@ time: 600_000,
             });
 
             await interaction.followUp({
-                embeds: [successEmbed('Template Updated', `Channel name template changed to \`${newTemplate}\``)],
+                embeds: [successEmbed('تم تحديث القالب', `تم تغيير قالب اسم القناة إلى \`${newTemplate}\``)],
                 flags: MessageFlags.Ephemeral,
             });
 
@@ -231,8 +231,8 @@ time: 600_000,
             }
             
             const errorMessage = error instanceof TitanBotError
-                ? error.userMessage || 'Could not update the channel name template.'
-                : 'Could not update the channel name template.';
+                ? error.userMessage || 'تعذر تحديث قالب اسم القناة.'
+                : 'تعذر تحديث قالب اسم القناة.';
                 
             await replyUserError(interaction, {
                 type: ErrorTypes.CONFIGURATION,
@@ -245,7 +245,7 @@ time: 600_000,
         if (reason === 'time') {
             replyUserError(interaction, {
                 type: ErrorTypes.RATE_LIMIT,
-                message: 'No response received. Template update cancelled.'
+                message: 'لم يتم استلام أي رد. تم إلغاء تحديث القالب.'
             }).catch(() => {});
         }
     });
@@ -253,17 +253,17 @@ time: 600_000,
 
 async function handleUserLimitChange(interaction, triggerChannel, currentConfig, client) {
     const embed = new EmbedBuilder()
-        .setTitle('User Limit Configuration')
-        .setDescription('Please enter the new user limit (0-99, where 0 = no limit).')
+        .setTitle('تكوين حد المستخدمين')
+        .setDescription('الرجاء إدخال الحد الأقصى الجديد للمستخدمين (من 0 إلى 99، حيث 0 يعني بلا حدود).')
         .addFields(
             {
-                name: 'Current Limit',
-                value: `${currentConfig.channelOptions?.[triggerChannel.id]?.userLimit || currentConfig.userLimit === 0 ? 'No limit' : currentConfig.userLimit + ' users'}`,
+                name: 'الحد الحالي',
+                value: `${(currentConfig.channelOptions?.[triggerChannel.id]?.userLimit ?? currentConfig.userLimit) === 0 ? 'بلا حدود' : (currentConfig.channelOptions?.[triggerChannel.id]?.userLimit ?? currentConfig.userLimit) + ' مستخدمين'}`,
                 inline: false
             }
         )
         .setColor(getColor('info'))
-        .setFooter({ text: 'Type the new limit in the chat below' });
+        .setFooter({ text: 'اكتب العدد الجديد في المحادثة أدناه' });
 
     await interaction.followUp({ embeds: [embed], flags: MessageFlags.Ephemeral });
 
@@ -280,7 +280,7 @@ async function handleUserLimitChange(interaction, triggerChannel, currentConfig,
             if (newLimit < 0 || newLimit > 99) {
                 await replyUserError(interaction, {
                     type: ErrorTypes.VALIDATION,
-                    message: 'User limit must be between 0 and 99.'
+                    message: 'يجب أن يكون حد المستخدمين بين 0 و 99.'
                 });
                 return;
             }
@@ -296,7 +296,7 @@ async function handleUserLimitChange(interaction, triggerChannel, currentConfig,
             });
 
             await interaction.followUp({
-                embeds: [successEmbed('Limit Updated', `User limit changed to ${newLimit === 0 ? 'No limit' : newLimit + ' users'}`)],
+                embeds: [successEmbed('تم تحديث الحد', `تم تغيير الحد الأقصى للمستخدمين إلى ${newLimit === 0 ? 'بلا حدود' : newLimit + ' مستخدمين'}`)],
                 flags: MessageFlags.Ephemeral,
             });
 
@@ -309,8 +309,8 @@ async function handleUserLimitChange(interaction, triggerChannel, currentConfig,
             }
             
             const errorMessage = error instanceof TitanBotError
-                ? error.userMessage || 'Could not update the user limit.'
-                : 'Could not update the user limit.';
+                ? error.userMessage || 'تعذر تحديث حد المستخدمين.'
+                : 'تعذر تحديث حد المستخدمين.';
                 
             await replyUserError(interaction, {
                 type: ErrorTypes.CONFIGURATION,
@@ -323,7 +323,7 @@ async function handleUserLimitChange(interaction, triggerChannel, currentConfig,
         if (reason === 'time') {
             replyUserError(interaction, {
                 type: ErrorTypes.RATE_LIMIT,
-                message: 'No valid response received. Update cancelled.'
+                message: 'لم يتم استلام رد صحيح. تم إلغاء التحديث.'
             }).catch(() => {});
         }
     });
@@ -331,22 +331,22 @@ async function handleUserLimitChange(interaction, triggerChannel, currentConfig,
 
 async function handleBitrateChange(interaction, triggerChannel, currentConfig, client) {
     const embed = new EmbedBuilder()
-        .setTitle('Bitrate Configuration')
-        .setDescription('Please enter the new bitrate in kbps (8-384).')
+        .setTitle('تكوين جودة الصوت (Bitrate)')
+        .setDescription('الرجاء إدخال جودة الصوت الجديدة بالكيلوبت (من 8 إلى 384).')
         .addFields(
             {
-                name: 'Current Bitrate',
-                value: `${(currentConfig.channelOptions?.[triggerChannel.id]?.bitrate || currentConfig.bitrate) / 1000} kbps`,
+                name: 'الجودة الحالية',
+                value: `${((currentConfig.channelOptions?.[triggerChannel.id]?.bitrate || currentConfig.bitrate) || 64000) / 1000} kbps`,
                 inline: false
             },
             {
-                name: 'Common Values',
-                value: '• 64 kbps - Normal quality\n• 96 kbps - Good quality\n• 128 kbps - High quality\n• 256 kbps - Very high quality',
+                name: 'قيم شائعة',
+                value: '• 64 kbps - جودة عادية\n• 96 kbps - جودة جيدة\n• 128 kbps - جودة عالية\n• 256 kbps - جودة عالية جداً',
                 inline: false
             }
         )
         .setColor(getColor('info'))
-        .setFooter({ text: 'Type the new bitrate in the chat below' });
+        .setFooter({ text: 'اكتب القيمة الجديدة في المحادثة أدناه' });
 
     await interaction.followUp({ embeds: [embed], flags: MessageFlags.Ephemeral });
 
@@ -363,7 +363,7 @@ async function handleBitrateChange(interaction, triggerChannel, currentConfig, c
             if (newBitrate < 8 || newBitrate > 384) {
                 await replyUserError(interaction, {
                     type: ErrorTypes.VALIDATION,
-                    message: 'Bitrate must be between 8 and 384 kbps.'
+                    message: 'يجب أن تكون جودة الصوت بين 8 و 384 kbps.'
                 });
                 return;
             }
@@ -379,7 +379,7 @@ async function handleBitrateChange(interaction, triggerChannel, currentConfig, c
             });
 
             await interaction.followUp({
-                embeds: [successEmbed('Bitrate Updated', `Bitrate changed to ${newBitrate} kbps`)],
+                embeds: [successEmbed('تم تحديث الجودة', `تم تغيير جودة الصوت إلى ${newBitrate} kbps`)],
                 flags: MessageFlags.Ephemeral,
             });
 
@@ -392,8 +392,8 @@ async function handleBitrateChange(interaction, triggerChannel, currentConfig, c
             }
             
             const errorMessage = error instanceof TitanBotError
-                ? error.userMessage || 'Could not update the bitrate.'
-                : 'Could not update the bitrate.';
+                ? error.userMessage || 'تعذر تحديث جودة الصوت.'
+                : 'تعذر تحديث جودة الصوت.';
                 
             await replyUserError(interaction, {
                 type: ErrorTypes.CONFIGURATION,
@@ -406,7 +406,7 @@ async function handleBitrateChange(interaction, triggerChannel, currentConfig, c
         if (reason === 'time') {
             replyUserError(interaction, {
                 type: ErrorTypes.RATE_LIMIT,
-                message: 'No valid response received. Update cancelled.'
+                message: 'لم يتم استلام رد صحيح. تم إلغاء التحديث.'
             }).catch(() => {});
         }
     });
@@ -414,19 +414,19 @@ async function handleBitrateChange(interaction, triggerChannel, currentConfig, c
 
 async function handleRemoveTrigger(interaction, triggerChannel, currentConfig, client) {
     const embed = new EmbedBuilder()
-        .setTitle('Remove Trigger Channel')
-        .setDescription(`Are you sure you want to remove ${triggerChannel} from the Join to Create system?`)
+        .setTitle('إزالة قناة التشغيل')
+        .setDescription(`هل أنت متأكد من أنك تريد إزالة القناة ${triggerChannel} من نظام الإنشاء التلقائي؟`)
         .setColor('#ff6600')
-        .setFooter({ text: 'This action cannot be undone' });
+        .setFooter({ text: 'لا يمكن التراجع عن هذا الإجراء' });
 
     const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`confirm_remove_${triggerChannel.id}`)
-            .setLabel('Remove Channel')
+            .setLabel('إزالة القناة')
             .setStyle(ButtonStyle.Danger),
         new ButtonBuilder()
             .setCustomId(`cancel_remove_${triggerChannel.id}`)
-            .setLabel('Cancel')
+            .setLabel('إلغاء')
             .setStyle(ButtonStyle.Secondary)
     );
 
@@ -453,13 +453,13 @@ async function handleRemoveTrigger(interaction, triggerChannel, currentConfig, c
                 
                 if (success) {
                     await buttonInteraction.followUp({
-                        embeds: [successEmbed('Channel Removed', `${triggerChannel} has been removed from the Join to Create system.`)],
+                        embeds: [successEmbed('تمت إزالة القناة', `تمت إزالة القناة ${triggerChannel} من نظام الإنشاء التلقائي بنجاح.`)],
                         flags: MessageFlags.Ephemeral,
                     });
                 } else {
                     await replyUserError(buttonInteraction, {
                         type: ErrorTypes.CONFIGURATION,
-                        message: 'Could not remove the trigger channel.'
+                        message: 'تعذر إزالة قناة التشغيل.'
                     });
                 }
             } catch (error) {
@@ -470,8 +470,8 @@ async function handleRemoveTrigger(interaction, triggerChannel, currentConfig, c
                 }
                 
                 const errorMessage = error instanceof TitanBotError
-                    ? error.userMessage || 'An error occurred while removing the trigger channel.'
-                    : 'An error occurred while removing the trigger channel.';
+                    ? error.userMessage || 'حدث خطأ أثناء إزالة قناة التشغيل.'
+                    : 'حدث خطأ أثناء إزالة قناة التشغيل.';
                     
                 await replyUserError(buttonInteraction, {
                     type: ErrorTypes.CONFIGURATION,
@@ -480,7 +480,7 @@ async function handleRemoveTrigger(interaction, triggerChannel, currentConfig, c
             }
         } else {
             await buttonInteraction.followUp({
-                embeds: [successEmbed('Cancelled', 'Channel removal has been cancelled.')],
+                embeds: [successEmbed('تم الإلغاء', 'تم إلغاء عملية إزالة القناة.')],
                 flags: MessageFlags.Ephemeral,
             });
         }
@@ -490,60 +490,4 @@ async function handleRemoveTrigger(interaction, triggerChannel, currentConfig, c
         if (reason === 'time') {
             replyUserError(interaction, {
                 type: ErrorTypes.RATE_LIMIT,
-                message: 'No response received. Removal cancelled.'
-            }).catch(() => {});
-        }
-    });
-}
-
-async function handleViewSettings(interaction, triggerChannel, currentConfig, client) {
-    const channelConfig = currentConfig.channelOptions?.[triggerChannel.id] || {};
-    
-    const embed = new EmbedBuilder()
-        .setTitle('Current Settings')
-        .setDescription(`Configuration for ${triggerChannel}`)
-        .setColor(getColor('info'))
-        .addFields(
-            {
-                name: 'Trigger Channel',
-                value: `${triggerChannel} (${triggerChannel.id})`,
-                inline: false
-            },
-            {
-                name: 'Channel Name Template',
-                value: `\`${channelConfig.nameTemplate || currentConfig.channelNameTemplate}\``,
-                inline: false
-            },
-            {
-                name: 'User Limit',
-                value: `${channelConfig.userLimit || currentConfig.userLimit === 0 ? 'No limit' : (channelConfig.userLimit || currentConfig.userLimit) + ' users'}`,
-                inline: true
-            },
-            {
-                name: 'Bitrate',
-                value: `${(channelConfig.bitrate || currentConfig.bitrate) / 1000} kbps`,
-                inline: true
-            },
-            {
-                name: 'Category',
-                value: currentConfig.categoryId ? `<#${currentConfig.categoryId}>` : 'Not set',
-                inline: true
-            },
-            {
-                name: 'System Status',
-                value: currentConfig.enabled ? '✅ Enabled' : '❌ Disabled',
-                inline: true
-            },
-            {
-                name: 'Active Temporary Channels',
-                value: Object.keys(currentConfig.temporaryChannels || {}).length.toString(),
-                inline: true
-            }
-        )
-        .setTimestamp();
-
-    await interaction.followUp({ 
-        embeds: [embed], 
-        flags: MessageFlags.Ephemeral 
-    });
-}
+                message: 'انتهت
