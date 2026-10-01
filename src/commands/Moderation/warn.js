@@ -6,24 +6,25 @@ import { WarningService } from '../../services/moderation/warningService.js';
 import { ModerationService } from '../../services/moderation/moderationService.js';
 import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
+
 export default {
     data: new SlashCommandBuilder()
         .setName("warn")
-        .setDescription("Warn a user")
+        .setDescription("إصدار تحذير بحق مستخدم معين")
         .addUserOption((o) =>
             o
                 .setName("target")
                 .setRequired(true)
-                .setDescription("User to warn"),
+                .setDescription("المستخدم المراد تحذيره"),
         )
         .addStringOption((o) =>
             o
                 .setName("reason")
                 .setRequired(true)
-                .setDescription("Reason for the warning"),
+                .setDescription("سبب إصدار التحذير"),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
-    category: "moderation",
+    category: "الإشراف",
 
     async execute(interaction, config, client) {
         const deferSuccess = await InteractionHelper.safeDefer(interaction);
@@ -46,7 +47,7 @@ export default {
             throw new TitanBotError(
                 'Missing target user',
                 ErrorTypes.USER_INPUT,
-                'You must specify a user to warn.',
+                'يجب عليك تحديد مستخدم لتحذيره.',
                 { subtype: 'invalid_user' },
             );
         }
@@ -55,7 +56,7 @@ export default {
             throw new TitanBotError(
                 'Missing warning reason',
                 ErrorTypes.VALIDATION,
-                'You must provide a reason for the warning.',
+                'يجب عليك تقديم سبب لإصدار التحذير.',
                 { subtype: 'missing_required' },
             );
         }
@@ -64,7 +65,7 @@ export default {
             throw new TitanBotError(
                 "Target not found",
                 ErrorTypes.USER_INPUT,
-                "The target user is not currently in this server."
+                "المستخدم المستهدف غير موجود حالياً في هذا السيرفر."
             );
         }
 
@@ -82,7 +83,7 @@ export default {
             client,
             guild: interaction.guild,
             event: {
-                action: "User Warned",
+                action: "تحذير مستخدم",
                 target: `${target.tag} (${target.id})`,
                 executor: `${moderator.tag} (${moderator.id})`,
                 reason,
@@ -99,8 +100,8 @@ export default {
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [
                 successEmbed(
-                    `⚠️ **Warned** ${target.tag}`,
-                    `**Reason:** ${reason}\n**Total Warns:** ${totalCount}`,
+                    `⚠️ **تم تحذير** ${target.tag}`,
+                    `**السبب:** ${reason}\n**إجمالي التحذيرات:** ${totalCount}`,
                 ),
             ],
         });
