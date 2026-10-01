@@ -4,10 +4,10 @@ import { buildNowPlayingReply } from '../../services/music/musicActions.js';
 import { deferMusicCommand } from '../../services/music/prefixSupport.js';
 
 export default {
-    category: 'الموسيقى',
+    category: 'Music',
     data: new SlashCommandBuilder()
         .setName('nowplaying')
-        .setDescription('عرض الأغنية المعروضة حالياً'),
+        .setDescription('Show the currently playing track'),
 
     async execute(interaction, config, client) {
         await deferMusicCommand(interaction);
