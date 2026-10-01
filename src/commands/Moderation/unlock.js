@@ -6,14 +6,15 @@ import { getColor } from '../../config/bot.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { replyUserError, ErrorTypes } from '../../utils/errorHandler.js';
+
 export default {
     data: new SlashCommandBuilder()
         .setName("unlock")
         .setDescription(
-            "Unlocks the current channel (allows @everyone to send messages again).",
+            "فتح الروم الحالي (السماح للجميع بإرسال الرسائل مرة أخرى)",
         )
-.setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
-    category: "moderation",
+        .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
+    category: "الإشراف",
 
     async execute(interaction, config, client) {
         const deferSuccess = await InteractionHelper.safeDefer(interaction);
@@ -37,7 +38,7 @@ export default {
                 currentPermissions.has(PermissionFlagsBits.SendMessages) ===
                     null
             ) {
-                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `${channel} is not explicitly locked (everyone can already send messages).` });
+                return await replyUserError(interaction, { type: ErrorTypes.UNKNOWN, message: `الروم ${channel} غير مقفل بشكل صريح (يمكن للجميع إرسال الرسائل بالفعل).` });
             }
 
             await channel.permissionOverwrites.edit(
@@ -45,20 +46,20 @@ export default {
                 { SendMessages: true },
                 {
                     type: 0,
-                    reason: `Channel unlocked by ${interaction.user.tag}`,
-},
+                    reason: `تم فتح الروم بواسطة ${interaction.user.tag}`,
+                },
             );
 
             await logEvent({
                 client,
                 guild: interaction.guild,
                 event: {
-                    action: "Channel Unlocked",
+                    action: "فتح الروم",
                     target: channel.toString(),
                     executor: `${interaction.user.tag} (${interaction.user.id})`,
                     metadata: {
                         channelId: channel.id,
-                        category: channel.parent?.name || 'None'
+                        category: channel.parent?.name || 'بدون فئة'
                     }
                 }
             });
@@ -66,14 +67,14 @@ export default {
             await InteractionHelper.safeEditReply(interaction, {
                 embeds: [
                     successEmbed(
-                        `🔓 **Channel Unlocked**`,
-                        `${channel} is now unlocked. You may speak now.`,
+                        `🔓 **تم فتح الروم**`,
+                        `الروم ${channel} مفتوح الآن. يمكنكم التحدث بحرية.`,
                     ),
                 ],
             });
         } catch (error) {
             logger.error('Unlock command error:', error);
-            await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'An unexpected error occurred while trying to unlock the channel. Check my permissions (I need \'Manage Channels\').' });
+            await replyUserError(interaction, { type: ErrorTypes.PERMISSION, message: 'حدث خطأ غير متوقع أثناء محاولة فتح الروم. تأكد من صلاحيات البوت (أحتاج إلى صلاحية إدارة الرومات - Manage Channels).' });
         }
     }
 };
