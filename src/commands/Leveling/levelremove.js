@@ -6,20 +6,21 @@ import { removeLevels, getUserLevelData, getLevelingConfig } from '../../service
 import { createEmbed } from '../../utils/embeds.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
+
 export default {
   data: new SlashCommandBuilder()
     .setName('levelremove')
-    .setDescription('Remove levels from a user')
+    .setDescription('إزالة مستويات من عضو ما')
     .addUserOption((option) =>
       option
         .setName('user')
-        .setDescription('The user to remove levels from')
+        .setDescription('العضو المراد إزالة المستويات منه')
         .setRequired(true)
     )
     .addIntegerOption((option) =>
       option
         .setName('levels')
-        .setDescription('Number of levels to remove')
+        .setDescription('عدد المستويات المراد إزالتها')
         .setRequired(true)
         .setMinValue(1)
     )
@@ -33,7 +34,7 @@ export default {
     const hasPermission = await checkUserPermissions(
       interaction,
       PermissionFlagsBits.ManageGuild,
-      'You need ManageGuild permission to use this command.'
+      'تحتاج إلى صلاحية **إدارة السيرفر** (Manage Server) لاستخدام هذا الأمر.'
     );
     if (!hasPermission) return;
 
@@ -43,7 +44,7 @@ export default {
         embeds: [
           new EmbedBuilder()
             .setColor('#f1c40f')
-            .setDescription('The leveling system is currently disabled on this server.')
+            .setDescription('نظام المستويات معطل حالياً في هذا السيرفر.')
         ],
         flags: MessageFlags.Ephemeral
       });
@@ -58,7 +59,7 @@ export default {
       throw new TitanBotError(
         `User ${targetUser.id} not found in this guild`,
         ErrorTypes.USER_INPUT,
-        'The specified user is not in this server.'
+        'العضو المحدد غير متواجد في هذا السيرفر.'
       );
     }
 
@@ -67,7 +68,7 @@ export default {
       throw new TitanBotError(
         `User ${targetUser.id} is already at minimum level`,
         ErrorTypes.VALIDATION,
-        `${targetUser.tag} is already at level 0 and cannot have levels removed.`
+        `العضو ${targetUser.tag} في المستوى 0 بالفعل ولا يمكن إزالة مستويات أخرى منه.`
       );
     }
 
@@ -76,8 +77,8 @@ export default {
     await InteractionHelper.safeEditReply(interaction, {
       embeds: [
         createEmbed({
-          title: 'Levels Removed',
-          description: `Successfully removed ${levelsToRemove} levels from ${targetUser.tag}.\n**New Level:** ${updatedData.level}`,
+          title: 'تم إزالة المستويات',
+          description: `تم إزالة **${levelsToRemove}** مستوى بنجاح من العضو ${targetUser.tag}.\n**المستوى الجديد:** ${updatedData.level}`,
           color: 'success'
         })
       ]
