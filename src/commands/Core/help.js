@@ -42,11 +42,35 @@ const CATEGORY_ICONS = {
     Verification: "✅",
 };
 
+// ترجمة مسميات الفئات البرمجية إلى اللغة العربية تلقائياً أو بشكل مخصص
+const CATEGORY_TRANSLATIONS = {
+    Core: "الأساسية",
+    Moderation: "الإشراف",
+    Economy: "الاقتصاد",
+    Music: "الموسيقى",
+    Fun: "الترفيه",
+    Leveling: "المستويات",
+    Utility: "الأدوات",
+    Ticket: "التذاكر",
+    Welcome: "الترحيب",
+    Giveaway: "الفعاليات والهدايا",
+    Counter: "العدادات",
+    Tools: "الأدوات المساعدة",
+    Search: "البحث",
+    "Reaction Roles": "رتب التفاعل",
+    Community: "المجتمع",
+    Birthday: "أعياد الميلاد",
+    "Join To Create": "إنشاء غرف صوتية",
+    Verification: "التحقق"
+};
+
 function formatCategoryName(rawCategory) {
-    return rawCategory
+    const formatted = rawCategory
         .replace(/_/g, '')
         .replace(/([a-z])([A-Z])/g, '$1 $2')
         .replace(/\b\w/g, (char) => char.toUpperCase());
+        
+    return CATEGORY_TRANSLATIONS[formatted] || formatted;
 }
 
 export async function createInitialHelpMenu(client) {
@@ -60,71 +84,76 @@ export async function createInitialHelpMenu(client) {
 
     const options = [
         {
-            label: "📋 All Commands",
-            description: "Browse every available command in a single list",
+            label: "📋 جميع الأوامر",
+            description: "تصفح كافة الأوامر المتاحة في قائمة واحدة متكاملة",
             value: ALL_COMMANDS_ID,
         },
         ...categoryDirs.map((category) => {
-            const categoryName = formatCategoryName(category);
-            const icon = CATEGORY_ICONS[categoryName] || "🔍";
+            const rawFormatted = category
+                .replace(/_/g, '')
+                .replace(/([a-z])([A-Z])/g, '$1 $2')
+                .replace(/\b\w/g, (char) => char.toUpperCase());
+            const categoryName = CATEGORY_TRANSLATIONS[rawFormatted] || rawFormatted;
+            const icon = CATEGORY_ICONS[rawFormatted] || "🔍";
             return {
                 label: `${icon} ${categoryName}`,
-                description: `View commands in the ${categoryName} category`,
+                description: `عرض الأوامر الخاصة بفئة ${categoryName}`,
                 value: category,
             };
         }),
     ];
 
-    const botName = client?.user?.username || "Bot";
+    const botName = client?.user?.username || "البوت";
     const embed = createEmbed({
-        title: `📖 ${botName} Help`,
-        description: 'Set up your server, pick what to enable, then browse commands below.',
+        title: `📖 قائمة مساعدة ${botName}`,
+        description: 'قم بإعداد سيرفرك، اختر ما تريد تفعيله، ثم تصفح الأوامر أدناه بسهولة.',
         color: 'primary',
         thumbnail: client.user?.displayAvatarURL?.({ size: 1024 }),
         fields: [
             {
-                name: '🚀 Getting Started',
+                name: '🚀 البدء السريع',
                 value: [
-                    '**1. Launch setup** — Run `/configwizard` to configure prefix, mod role, and logs.',
-                    '**2. Enable systems** — Use `/commands dashboard` to turn categories on or off.',                    '**3. Browse commands** — Use the menu below to view categories and commands.',
+                    '**1. بدء الإعداد** — قم بتشغيل الأمر `/configwizard` لتعيين البادئة، رتبة الإشراف، وسجلات السيرفر.',
+                    '**2. تفعيل الأنظمة** — استخدم `/commands dashboard` لتشغيل أو إيقاف الفئات المختلفة.',
+                    '**3. تصفح الأوامر** — استخدم القائمة المنسدلة أدناه لعرض الفئات والأوامر المتاحة.',
                 ].join('\n'),
                 inline: false,
             },
             {
-                name: 'ℹ️ How It Works',
+                name: 'ℹ️ كيف يعمل النظام',
                 value: [
-                    '• Dashboard commands manage each feature visually',
-                    '• Settings are saved per server',
-                    '• Slash commands and prefixes both work once enabled',
+                    '• تتيح لك لوحة التحكم إدارة كل ميزة بشكل مرئي وسهل',
+                    '• يتم حفظ جميع الإعدادات المخصصة لكل سيرفر على حدة',
+                    '• تعمل أوامر البادئة والأوامر التفاعلية (Slash Commands) بكفاءة فور تفعيلها',
                 ].join('\n'),
                 inline: false,
             },
             {
                 name: '\u200B',
-                value: `-# ${botName} is [open source](https://youtu.be/1jCZX8s3bJE?si=NPOYx-vxVE1I5vJK)`,
+                value: `-# هذا البوت [مفتوح المصدر](https://youtu.be/1jCZX8s3bJE?si=NPOYx-vxVE1I5vJK)`,
                 inline: false,
             },
         ],
     });
 
     embed.setFooter({ 
-        text: "Made with ❤️" 
+        text: "صُنع بكل حب ❤️" 
     });
     embed.setTimestamp();
 
     const bugReportButton = new ButtonBuilder()
         .setCustomId(BUG_REPORT_BUTTON_ID)
-        .setLabel("Report Bug")
+        .setLabel("الإبلاغ عن مشكلة")
         .setStyle(ButtonStyle.Danger);
 
     const supportButton = new ButtonBuilder()
-        .setLabel("Support Server")
+        .setLabel("سيرفر الدعم الفني")
         .setURL("https://discord.gg/QnWNz2dKCE")
         .setStyle(ButtonStyle.Link);
 
     const selectRow = createSelectMenu(
         CATEGORY_SELECT_ID,
-        "Select to view the commands",
+        "اختر فئة لعرض الأوامر الخاصة بها",
         options,
     );
 
@@ -143,11 +172,10 @@ export default {
     slashOnly: true,
     data: new SlashCommandBuilder()
         .setName("help")
-        .setDescription("Displays the help menu with all available commands"),
+        .setDescription("عرض قائمة المساعدة التفاعلية وكافة الأوامر المتاحة"),
 
     async execute(interaction, guildConfig, client) {
         
-        const { MessageFlags } = await import('discord.js');
         await InteractionHelper.safeDefer(interaction);
         
         const { embeds, components } = await createInitialHelpMenu(client);
@@ -164,8 +192,8 @@ export default {
                 }
 
                 const closedEmbed = createEmbed({
-                    title: "Help menu closed",
-                    description: "Help menu has been closed, use /help again.",
+                    title: "تم إغلاق قائمة المساعدة",
+                    description: "انتهت صلاحية لوحة المساعدة. يمكنك استخدام أمر /help مرة أخرى لإظهارها.",
                     color: "secondary",
                 });
 
