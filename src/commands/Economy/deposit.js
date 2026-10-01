@@ -7,11 +7,11 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('deposit')
-        .setDescription('Deposit money from your wallet into your bank')
+        .setDescription('إيداع الأموال من محفظتك إلى البنك')
         .addStringOption(option =>
             option
                 .setName('amount')
-                .setDescription('Amount to deposit (number or "all")')
+                .setDescription('المبلغ المراد إيداعه (رقم أو كلمة "all" للكل)')
                 .setRequired(true)
         ),
 
@@ -29,7 +29,7 @@ export default {
                 throw createError(
                     "Failed to load economy data",
                     ErrorTypes.DATABASE,
-                    "Failed to load your economy data. Please try again later.",
+                    "فشل في تحميل بيانات الاقتصاد الخاصة بك. يرجى المحاولة مرة أخرى لاحقاً.",
                     { userId, guildId }
                 );
             }
@@ -46,7 +46,7 @@ export default {
                     throw createError(
                         "Invalid deposit amount",
                         ErrorTypes.VALIDATION,
-                        `Please enter a valid number or 'all'. You entered: \`${amountInput}\``,
+                        `يرجى إدخال رقم صحيح أو كلمة 'all'. القيمة التي أدخلتها: \`${amountInput}\``,
                         { amountInput, userId }
                     );
                 }
@@ -56,7 +56,7 @@ export default {
                 throw createError(
                     "Zero deposit amount",
                     ErrorTypes.VALIDATION,
-                    "You have no cash to deposit.",
+                    "ليس لديك أي أموال نقدية لإيداعها.",
                     { userId, walletBalance: userData.wallet }
                 );
             }
@@ -67,7 +67,7 @@ export default {
                     embeds: [
                         buildUserErrorEmbed(
                             'validation',
-                            `You tried to deposit more than you have. Depositing your remaining cash: **$${depositAmount.toLocaleString()}**`
+                            `لقد حاولت إيداع مبلغ أكبر مما تمتلكه. جاري إيداع ما تبقى في محفظتك: **$${depositAmount.toLocaleString()}**`
                         )
                     ],
                     flags: MessageFlags.Ephemeral,
@@ -80,7 +80,7 @@ export default {
                 throw createError(
                     "Bank is full",
                     ErrorTypes.VALIDATION,
-                    `Your bank is currently full (Max Capacity: $${maxBank.toLocaleString()}). Purchase a **Bank Upgrade** to increase your limit.`,
+                    `بنكك ممتلئ حالياً (السعة القصوى: $${maxBank.toLocaleString()}). قم بشراء **ترقية للبنك** لزيادة الحد الأقصى.`,
                     { maxBank, currentBank: userData.bank, userId }
                 );
             }
@@ -94,7 +94,7 @@ export default {
                         embeds: [
                             buildUserErrorEmbed(
                                 'validation',
-                                `You only had space for **$${depositAmount.toLocaleString()}** in your bank account (Max: $${maxBank.toLocaleString()}). The rest remains in your cash.`
+                                `يوجد لديك مساحة لـ **$${depositAmount.toLocaleString()}** فقط في حسابك البنكي (الحد الأقصى: $${maxBank.toLocaleString()}). سيبقى الباقي في محفظتك النقدية.`
                             )
                         ],
                         flags: MessageFlags.Ephemeral,
@@ -106,7 +106,7 @@ export default {
                 throw createError(
                     "No space or cash for deposit",
                     ErrorTypes.VALIDATION,
-                    "The amount you tried to deposit was either 0 or exceeded your bank capacity after checking your cash balance.",
+                    "المبلغ الذي حاولت إيداعه كان صفراً أو تجاوز السعة الاستيعابية لبنكك بعد التحقق من رصيدك النقدي.",
                     { depositAmount, availableSpace, walletBalance: userData.wallet }
                 );
             }
@@ -117,17 +117,17 @@ export default {
             await setEconomyData(client, guildId, userId, userData);
 
             const embed = successEmbed(
-                'Deposit Successful',
-                `You successfully deposited **$${depositAmount.toLocaleString()}** into your bank.`
+                'تمت عملية الإيداع بنجاح',
+                `لقد قمت بإيداع **$${depositAmount.toLocaleString()}** في بنكك بنجاح.`
             )
                 .addFields(
                     {
-                        name: "New Cash Balance",
+                        name: "رصيد المحفظة الجديد",
                         value: `$${userData.wallet.toLocaleString()}`,
                         inline: true,
                     },
                     {
-                        name: "New Bank Balance",
+                        name: "رصيد البنك الجديد",
                         value: `$${userData.bank.toLocaleString()} / $${maxBank.toLocaleString()}`,
                         inline: true,
                     },
