@@ -6,10 +6,10 @@ export default {
     slashOnly: true,
     category: 'Music',
     data: new SlashCommandBuilder()
-        .setName('تشغيل')
-        .setDescription('تشغيل أغنية أو إضافتها إلى قائمة الانتظار')
+        .setName('play')
+        .setDescription('Play a song or add it to the queue')
         .addStringOption((opt) =>
-            opt.setName('البحث').setDescription('اسم الأغنية أو رابط اليوتيوب/المنصات').setRequired(true),
+            opt.setName('query').setDescription('Song name or URL').setRequired(true),
         ),
 
     async execute(interaction, config, client) {
@@ -18,7 +18,7 @@ export default {
             return;
         }
 
-        const result = await playQuery(client, interaction, interaction.options.getString('البحث'));
+        const result = await playQuery(client, interaction, interaction.options.getString('query'));
         await replyMusicSuccess(interaction, result.embed);
     },
 };
