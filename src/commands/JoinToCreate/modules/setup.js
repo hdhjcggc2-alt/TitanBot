@@ -36,14 +36,14 @@ export default {
             });
 
             const embed = successEmbed(
-                '✅ Join to Create Setup Complete',
-                `Created trigger channel: ${triggerChannel}\n\n` +
-                `**Settings:**\n` +
-                `• Temporary Channel Name Template: \`${nameTemplate}\`\n` +
-                `• User Limit: ${userLimit === 0 ? 'No limit' : userLimit + ' users'}\n` +
-                `• Bitrate: ${bitrate} kbps\n` +
-                `${category ?`• Category: ${category.name}`: '• Category: None (root level)'}\n\n` +
-                `When users join this channel, a temporary voice channel will be created for them.`
+                '✅ اكتمل إعداد نظام الإنشاء التلقائي',
+                `تم إنشاء قناة التشغيل: ${triggerChannel}\n\n` +
+                `**الإعدادات:**\n` +
+                `• قالب اسم القناة المؤقتة: \`${nameTemplate}\`\n` +
+                `• الحد الأقصى للمستخدمين: ${userLimit === 0 ? 'بلا حدود' : userLimit + ' مستخدمين'}\n` +
+                `• جودة الصوت (Bitrate): ${bitrate} kbps\n` +
+                `${category ? `• القسم: ${category.name}` : '• القسم: بدون (القسم الرئيسي)'}\n\n` +
+                `عندما ينضم المستخدمون إلى هذه القناة، سيتم إنشاء قناة صوتية مؤقتة لهم.`
             );
 
             try {
@@ -71,7 +71,7 @@ export default {
             throw new TitanBotError(
                 `Setup failed: ${error.message}`,
                 ErrorTypes.DISCORD_API,
-                'Failed to set up Join to Create system.'
+                'فشل إعداد نظام الإنشاء التلقائي.'
             );
         }
     }
