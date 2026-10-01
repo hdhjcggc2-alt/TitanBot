@@ -32,24 +32,24 @@ function resolveTargetChannel(interaction) {
 export default {
     data: new SlashCommandBuilder()
         .setName('say')
-        .setDescription('Send a plain message as the bot')
+        .setDescription('إرسال رسالة عادية على لسان البوت')
         .addStringOption((option) =>
             option
                 .setName('message')
-                .setDescription('The message the bot should send')
+                .setDescription('الرسالة التي يجب على البوت إرسالها')
                 .setRequired(true)
                 .setMaxLength(2000),
         )
         .addChannelOption((option) =>
             option
                 .setName('channel')
-                .setDescription('Channel to send in (defaults to the current channel)')
+                .setDescription('الروم المراد الإرسال فيه (افتراضياً: الروم الحالي)')
                 .addChannelTypes(...TEXT_CHANNEL_TYPES)
                 .setRequired(false),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
         .setDMPermission(false),
-    category: 'moderation',
+    category: 'الإشراف',
     abuseProtection: { maxAttempts: 8, windowMs: 60_000 },
 
     async execute(interaction, _config, client) {
@@ -71,7 +71,7 @@ export default {
         if (!message) {
             return replyUserError(interaction, {
                 type: ErrorTypes.VALIDATION,
-                message: 'Message cannot be empty.',
+                message: 'لا يمكن أن تكون الرسالة فارغة.',
             });
         }
 
@@ -79,7 +79,7 @@ export default {
         if (!channel) {
             return replyUserError(interaction, {
                 type: ErrorTypes.VALIDATION,
-                message: 'Choose a text channel or run this command in one.',
+                message: 'الرجاء اختيار روم نصي أو تنفيذ هذا الأمر داخله.',
             });
         }
 
@@ -89,14 +89,14 @@ export default {
         if (!memberPermissions?.has(PermissionFlagsBits.SendMessages)) {
             return replyUserError(interaction, {
                 type: ErrorTypes.PERMISSION,
-                message: `You do not have permission to send messages in ${channel}.`,
+                message: `ليس لديك صلاحية لإرسال رسائل في ${channel}.`,
             });
         }
 
         if (!botPermissions?.has(PermissionFlagsBits.SendMessages)) {
             return replyUserError(interaction, {
                 type: ErrorTypes.PERMISSION,
-                message: `I do not have permission to send messages in ${channel}.`,
+                message: `لا أملك صلاحية لإرسال رسائل في ${channel}.`,
             });
         }
 
@@ -106,7 +106,7 @@ export default {
             client,
             guild: interaction.guild,
             event: {
-                action: 'Bot Message Sent',
+                action: 'إرسال رسالة بواسطة البوت',
                 target: `${channel} (${channel.id})`,
                 executor: `${interaction.user.tag} (${interaction.user.id})`,
                 reason: message.length > 200
@@ -124,8 +124,8 @@ export default {
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [
                 successEmbed(
-                    'Message Sent',
-                    `Posted in ${channel}. [Jump to message](${sentMessage.url})`,
+                    'تم إرسال الرسالة',
+                    `تم النشر في ${channel}. [الانتقال للرسالة](${sentMessage.url})`,
                 ),
             ],
             flags: MessageFlags.Ephemeral,
